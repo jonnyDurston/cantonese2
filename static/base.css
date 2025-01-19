@@ -1,0 +1,8 @@
+body {
+    font-family: Arial, Verdana, sans-serif;
+}
+
+.hidden {
+    color: transparent;
+    cursor: pointer;
+}

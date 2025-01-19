@@ -5,6 +5,7 @@ Database connection dependency that will be injected in
 import json
 
 from psycopg_pool import AsyncConnectionPool
+from psycopg.rows import dict_row
 
 # Create an AsyncConnectionPool
 database_pool: AsyncConnectionPool | None = None
@@ -46,4 +47,5 @@ async def get_database_connection():
         raise RuntimeError("Database pool is not initialized.")
 
     async with database_pool.connection() as conn:
+        conn.row_factory = dict_row
         yield conn

@@ -2,25 +2,74 @@
 <html>
 
 <head>
-    <title>Data from Database</title>
+    <title>Vocabulary</title>
+    <link rel="stylesheet" href="static/table.css">
+    <link rel="stylesheet" href="static/base.css">
 </head>
 
 <body>
-    <h1>Data from Database</h1>
-    <table border="1">
+    <h2>List of all vocabulary</h2>
+
+    <table class="language-table" id="main-table">
+
+        <!-- Contains buttons that can hide the visibility of each column -->
         <tr>
-            {% for col in rows[0]._fields %}
-            <th>{{ col }}</th>
-            {% endfor %}
+            <th><button onclick="toggleColumn(1)">Hide Cantonese</button></th>
+            <th><button onclick="toggleColumn(2)">Hide Jyutping</button></th>
+            <th><button onclick="toggleColumn(3)">Hide English</button></th>
         </tr>
-        {% for row in rows %}
+
+        <!-- Contents of table pulled from db -->
+        {% for phrase in vocab %}
         <tr>
-            {% for cell in row %}
-            <td>{{ cell }}</td>
-            {% endfor %}
+            <td>{{ phrase.cantonese }}</td>
+            <td>{{ phrase.jyutping|colornum|safe }}</td>
+            <td>{{ phrase.english }}</td>
         </tr>
         {% endfor %}
+
     </table>
+
+    <p>
+        Here is some miscellaneous text because I'd like to test how it looks
+    </p>
+
+    <script>
+        // Function to toggle the visibility of a column
+        function toggleColumn(columnIndex) {
+            const table = document.getElementById('main-table');
+            const rows = table.querySelectorAll('tr');
+
+            rows.forEach((row) => {
+                const cell = row.children[columnIndex - 1]; // Adjust for 0-based index
+                if (cell) {
+                    const cell_spans = cell.querySelectorAll('span');
+                    if (cell.classList.contains('hidden')) {
+                        // Reveal cell
+                        cell.classList.remove('hidden');
+                        cell_spans.forEach((span) => {
+                            span.classList.remove('hidden');
+                        });
+                    } else {
+                        // Hide cell
+                        cell.classList.add('hidden');
+                        cell_spans.forEach((span) => {
+                            span.classList.add('hidden');
+                        });
+                    }
+                }
+            });
+        }
+
+        // Event delegation for revealing individual cells
+        document.getElementById('main-table').addEventListener('click', (event) => {
+            if (event.target.tagName === 'TD' && event.target.classList.contains('hidden')) {
+                // Reveal clicked cell
+                event.target.classList.remove('hidden');
+            }
+        });
+    </script>
+
 </body>
 
 </html>

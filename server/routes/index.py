@@ -1,18 +1,17 @@
 from fastapi import Depends, Request
-from psycopg import sql
+from fastapi.templating import Jinja2Templates
+from psycopg import AsyncConnection
 
 from ..database import get_database_connection
 from ..templates import get_jinja_templates
+from ..crud import get_all_vocab
 
 
 async def index(
-    request: Request, conn=Depends(get_database_connection), templates=Depends(get_jinja_templates)
+    request: Request,
+    conn: AsyncConnection = Depends(get_database_connection),
+    templates: Jinja2Templates = Depends(get_jinja_templates),
 ):
     """Fetch data from the database and render it using a Jinja2 template."""
-    query = sql.SQL("SELECT * FROM vocabulary")
-    async with conn.cursor() as cur:
-        await cur.execute(query)
-        rows = await cur.fetchall()
-
-    # Pass data to the Jinja2 template
-    return templates.TemplateResponse("index.html", {"request": request, "rows": rows})
+    vocab = await get_all_vocab(conn)
+    return templates.TemplateResponse("index.html", {"request": request, "vocab": vocab})

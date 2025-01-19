@@ -1,0 +1,63 @@
+/* General table styling */
+.language-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 16px;
+    text-align: center;
+}
+
+/* Table header styling */
+.language-table th {
+    background-color: #f4f4f4;
+    color: #333;
+    padding: 10px;
+    border: 1px solid #ffffff;
+}
+
+/* Table body styling */
+.language-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+/* First column (Cantonese) */
+.language-table td:first-child {
+    background-color: #ffebcd;
+    font-size: 20px;
+}
+
+/* Second column (Jyutping) */
+.language-table td:nth-child(2) {
+    background-color: #e6f7ff;
+}
+
+/* Colors for Jyutping numbers */
+.jyutping-number-1 {
+    color: firebrick;
+}
+
+.jyutping-number-2 {
+    color: rgb(247, 129, 18);
+}
+
+.jyutping-number-3 {
+    color: rgb(63, 135, 41);
+}
+
+.jyutping-number-4 {
+    color: rgb(43, 81, 99);
+}
+
+.jyutping-number-5 {
+    color: rgb(78, 47, 138);
+}
+
+.jyutping-number-6 {
+    color: rgb(115, 49, 103);
+}
+
+/* Third column (English) */
+.language-table td:last-child {
+    background-color: #e8ffe6;
+}
