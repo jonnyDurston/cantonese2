@@ -42,15 +42,15 @@
 }
 
 .jyutping-number-3 {
-    color: rgb(63, 135, 41);
+    color: rgb(118, 131, 59);
 }
 
 .jyutping-number-4 {
-    color: rgb(43, 81, 99);
+    color: rgb(31, 83, 51);
 }
 
 .jyutping-number-5 {
-    color: rgb(78, 47, 138);
+    color: rgb(67, 42, 180);
 }
 
 .jyutping-number-6 {
@@ -58,6 +58,67 @@
 }
 
 /* Third column (English) */
-.language-table td:last-child {
+.language-table td:nth-child(3) {
     background-color: #e8ffe6;
+}
+
+.language-table tbody tr:last-child td {
+    padding: 0;
+    margin: 0;
+}
+
+.language-table tbody tr:last-child td input {
+    padding: 10px;
+    margin: 0;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    box-sizing: border-box;
+    width: 100%;
+    text-align: center;
+    font-size: inherit;
+    font-family: inherit;
+}
+
+/* Re-adding specific column stylings for final row */
+
+.language-table tbody tr:last-child td:nth-child(1) {
+    background-color: #000;
+    font-size: 20px;
+}
+
+.language-table tbody tr:last-child td:nth-child(2),
+.language-table tbody tr:last-child td:nth-child(2) input {
+    background-color: #ffebcd;
+    font-size: 20px;
+}
+
+.language-table tbody tr:last-child td:nth-child(3),
+.language-table tbody tr:last-child td:nth-child(3) input {
+    background-color: #e6f7ff;
+}
+
+.language-table tbody tr:last-child td:nth-child(4),
+.language-table tbody tr:last-child td:nth-child(4) input {
+    background-color: #e8ffe6;
+}
+
+.language-table tbody tr:last-child td:last-child {
+    border: none;
+}
+
+.add-button {
+    display: inline-block;
+    margin-left: 5px;
+    padding: 5px 10px;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    background-color: green;
+    border-radius: 25%;
+    cursor: pointer;
+}
+
+.add-button:hover {
+    background-color: darkgreen;
 }
