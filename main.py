@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from pycantonese import characters_to_jyutping
 
 from server.database import init_db_pool, shutdown_db_pool
-from server.routes import jyutping
+from server.routes import favicon, jyutping, insert_vocabulary
 
 
 @asynccontextmanager
@@ -45,6 +45,8 @@ if __name__ == "__main__":
 
     app.get("/index.html", response_class=HTMLResponse)(index)
     app.get("/jyutping")(jyutping)
+    app.post("/vocabulary")(insert_vocabulary)
     app.mount("/static", StaticFiles(directory="static"), name="static")
+    app.get("/favicon.ico", include_in_schema=False)(favicon)
 
     uvicorn.run(app, host="127.0.0.1", port=8000)

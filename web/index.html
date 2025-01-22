@@ -42,8 +42,8 @@
             <form id="add-phrase" onsubmit="addPhrase(event)">
                 <td><input type="text" name="cantonese" id="cantonese-input" required></td>
                 <td><input type="text" name="jyutping" id="jyutping-input" required></td>
-                <td><input type="text" name="english" required></td>
-                <td><button type="submit" class="add-button">+</button></td>
+                <td><input type="text" name="english" id="english-input" required></td>
+                <td><button type="submit" class="add-button" id="add-button">+</button></td>
             </form>
         </tr>
 
@@ -130,6 +130,30 @@
                         console.error('Error fetching data:', error);
                     });
             }
+        });
+
+        // Inserting row when button clicked
+        document.getElementById('add-button').addEventListener('click', function () {
+            const requestBody = {
+                cantonese: document.getElementById('cantonese-input').value,
+                jyutping: document.getElementById('jyutping-input').value,
+                english: document.getElementById('english-input').value
+            }
+
+            fetch('http://localhost:8000/vocabulary', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         });
 
     </script>

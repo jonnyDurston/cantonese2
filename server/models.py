@@ -1,0 +1,7 @@
+from pydantic import BaseModel
+
+
+class POSTVocabulary(BaseModel):
+    cantonese: str
+    jyutping: str
+    english: str
