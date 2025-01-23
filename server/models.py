@@ -5,3 +5,7 @@ class POSTVocabulary(BaseModel):
     cantonese: str
     jyutping: str
     english: str
+
+
+class POSTTag(BaseModel):
+    tag_name: str

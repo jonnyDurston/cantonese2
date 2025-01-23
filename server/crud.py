@@ -3,7 +3,27 @@ from psycopg import AsyncConnection, sql
 
 async def get_all_vocab(conn: AsyncConnection):
     async with conn.cursor() as cur:
-        await cur.execute(sql.SQL("SELECT cantonese, jyutping, english FROM vocabulary"))
+        await cur.execute(
+            sql.SQL("SELECT cantonese, jyutping, english FROM vocabulary ORDER BY created_date")
+        )
+        return await cur.fetchall()
+
+
+async def get_vocab_with_tags(conn: AsyncConnection, tags: list[str]):
+    async with conn.cursor() as cur:
+        await cur.execute(
+            sql.SQL(
+                """
+                WITH selected_tags AS (SELECT UNNEST(%s::TEXT[]) AS tag_name)
+                SELECT v.cantonese, v.jyutping, v.english FROM vocabulary v
+                JOIN vocabulary_tags vt ON v.vocab_id = vt.vocab_id
+                JOIN selected_tags st ON vt.tag_name = st.tag_name
+                GROUP BY v.cantonese, v.jyutping, v.english
+                HAVING COUNT(DISTINCT st.tag_name) = (SELECT COUNT(*) FROM selected_tags);
+                """
+            ),
+            (tags,),
+        )
         return await cur.fetchall()
 
 
@@ -15,4 +35,19 @@ async def insert_vocab(cantonese: str, jyutping: str, english: str, conn: AsyncC
             ),
             (cantonese, jyutping, english),
         )
-        return response.fetchone()
+        return await response.fetchone()
+
+
+async def get_all_tags(conn: AsyncConnection):
+    async with conn.cursor() as cur:
+        await cur.execute(sql.SQL("SELECT tag_name FROM tags ORDER BY tag_name"))
+        return await cur.fetchall()
+
+
+async def insert_tag(conn: AsyncConnection, tag_name: str):
+    async with conn.cursor() as cur:
+        response = await cur.execute(
+            sql.SQL("INSERT INTO tags (tag_name) VALUES (%s) RETURNING tag_name;"),
+            (tag_name,),
+        )
+        return await response.fetchone()

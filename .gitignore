@@ -1,2 +1,3 @@
 .venv
 .DATABASE_CREDS
+migrate.py

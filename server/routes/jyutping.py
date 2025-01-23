@@ -11,6 +11,4 @@ async def jyutping(characters: str):
     if None in [i[1] for i in converted]:
         raise HTTPException(400, "Invalid characters entered.")
 
-    print(" ".join([sub(r"(?<=\d)", " ", i[1])[:-1] for i in converted]))
-
     return {"jyutping": " ".join([sub(r"(?<=\d)", " ", i[1])[:-1] for i in converted])}
