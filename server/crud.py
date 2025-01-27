@@ -18,8 +18,9 @@ async def get_vocab_with_tags(conn: AsyncConnection, tags: list[str]):
                 SELECT v.cantonese, v.jyutping, v.english FROM vocabulary v
                 JOIN vocabulary_tags vt ON v.vocab_id = vt.vocab_id
                 JOIN selected_tags st ON vt.tag_name = st.tag_name
-                GROUP BY v.cantonese, v.jyutping, v.english
-                HAVING COUNT(DISTINCT st.tag_name) = (SELECT COUNT(*) FROM selected_tags);
+                GROUP BY v.cantonese, v.jyutping, v.english, v.created_date
+                HAVING COUNT(DISTINCT st.tag_name) = (SELECT COUNT(*) FROM selected_tags)
+                ORDER BY v.created_date;
                 """
             ),
             (tags,),
@@ -51,3 +52,12 @@ async def insert_tag(conn: AsyncConnection, tag_name: str):
             (tag_name,),
         )
         return await response.fetchone()
+
+
+async def tag_vocab(vocab_id: int, tags: list[str], conn: AsyncConnection):
+    async with conn.cursor() as cur:
+        print([(vocab_id, tag_name) for tag_name in tags])
+        await cur.executemany(
+            sql.SQL("INSERT INTO vocabulary_tags (vocab_id, tag_name) VALUES (%s, %s)"),
+            [(vocab_id, tag_name) for tag_name in tags],
+        )

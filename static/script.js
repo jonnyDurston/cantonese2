@@ -24,6 +24,26 @@ function updateColumnVisibility(columnIndex, isVisible) {
     });
 }
 
+// Helper function for reloading the page and preserving the scroll location
+function refreshPage(url = null) {
+    sessionStorage.setItem('scrollpos', window.scrollY);
+    if (url) {
+        window.location.href = url;
+    } else {
+        const currentUrl = new URL(window.location.href);
+        window.location.href = currentUrl.toString();
+    }
+}
+
+// Ensuring that on reload we go to the desired scroll position if necessary
+document.addEventListener("DOMContentLoaded", function (event) {
+    var scrollpos = sessionStorage.getItem('scrollpos');
+    if (scrollpos) {
+        window.scrollTo(0, scrollpos);
+        sessionStorage.removeItem('scrollpos')
+    }
+});
+
 // For different visibility toggles
 document.querySelector('.toggle-container').addEventListener('change', (event) => {
     const selectedValue = event.target.value;
@@ -77,11 +97,18 @@ document.getElementById('cantonese-input').addEventListener('input', function ()
 });
 
 // Inserting row when button clicked
-document.getElementById('add-button').addEventListener('click', function () {
+document.getElementById('add-button').addEventListener('click', function (event) {
+    event.preventDefault(); // Prevent form submission
+
+    const checkboxes = document.getElementsByClassName('tag-checkbox');
+    const selectedTags = Array.from(checkboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value)
     const requestBody = {
         cantonese: document.getElementById('cantonese-input').value,
         jyutping: document.getElementById('jyutping-input').value,
-        english: document.getElementById('english-input').value
+        english: document.getElementById('english-input').value,
+        tags: selectedTags
     }
 
     fetch('http://localhost:8000/vocabulary', {
@@ -93,7 +120,8 @@ document.getElementById('add-button').addEventListener('click', function () {
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);
             }
-            window.location.reload();
+            // Reload the page while preserving the query parameters
+            refreshPage();
         })
         .catch(error => {
             console.error('Error:', error);
@@ -103,7 +131,6 @@ document.getElementById('add-button').addEventListener('click', function () {
 // Reloading the page when checkbox is ticked
 Array.from(document.getElementsByClassName('tag-checkbox')).forEach((checkbox) => {
     checkbox.addEventListener('change', function () {
-        console.log('HEREEEE')
         const checkboxes = document.getElementsByClassName('tag-checkbox');
         const selectedTags = Array.from(checkboxes)
             .filter(checkbox => checkbox.checked)
@@ -116,6 +143,6 @@ Array.from(document.getElementsByClassName('tag-checkbox')).forEach((checkbox) =
             url.searchParams.delete('tags');
         }
 
-        window.location.href = url;
+        refreshPage(url);
     })
 })

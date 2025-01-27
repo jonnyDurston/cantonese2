@@ -5,6 +5,7 @@ class POSTVocabulary(BaseModel):
     cantonese: str
     jyutping: str
     english: str
+    tags: list[str] = []
 
 
 class POSTTag(BaseModel):

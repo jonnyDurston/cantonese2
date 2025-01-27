@@ -1,3 +1,5 @@
 .venv
 .DATABASE_CREDS
 migrate.py
+__pycache__/
+*.py[cod]
