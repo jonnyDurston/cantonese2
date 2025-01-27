@@ -27,9 +27,11 @@
 
     <!-- Input and button for adding new tags -->
     <br><br>
-    <label for="new-tag">Add New Tag:</label>
-    <input type="text" id="new-tag" placeholder="Enter a new tag">
-    <button id="add-tag-button">Add Tag</button>
+    <form id="add-tag">
+        <label for="new-tag">Add New Tag:</label>
+        <input type="text" id="new-tag" placeholder="Enter a new tag">
+        <button id="add-tag-button">Add Tag</button>
+    </form>
 
     <!-- Allows toggling of visibilities -->
     <div class="toggle-container">
@@ -62,7 +64,7 @@
         <!-- Additional row at bottom of table allows adding a new phrase -->
         <!-- autocomplete="one-time-code" stops chrome autofilling (annoying) -->
         <tr>
-            <form id="add-phrase" onsubmit="addPhrase(event)">
+            <form id="add-phrase">
                 <td><input type="text" name="cantonese" id="cantonese-input" autocomplete="one-time-code" required></td>
                 <td><input type="text" name="jyutping" id="jyutping-input" autocomplete="one-time-code" required></td>
                 <td><input type="text" name="english" id="english-input" autocomplete="one-time-code" required></td>

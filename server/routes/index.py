@@ -16,7 +16,7 @@ async def index(
     """Fetch data from the database and render it using a Jinja2 template."""
     filter_tags = tags.split(",") if tags else []
     if tags:
-        vocab = await get_vocab_with_tags(conn, filter_tags)
+        vocab = await get_vocab_with_tags(filter_tags, conn)
     else:
         vocab = await get_all_vocab(conn)
 

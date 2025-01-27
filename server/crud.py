@@ -9,7 +9,7 @@ async def get_all_vocab(conn: AsyncConnection):
         return await cur.fetchall()
 
 
-async def get_vocab_with_tags(conn: AsyncConnection, tags: list[str]):
+async def get_vocab_with_tags(tags: list[str], conn: AsyncConnection):
     async with conn.cursor() as cur:
         await cur.execute(
             sql.SQL(
@@ -45,7 +45,7 @@ async def get_all_tags(conn: AsyncConnection):
         return await cur.fetchall()
 
 
-async def insert_tag(conn: AsyncConnection, tag_name: str):
+async def insert_tag(tag_name: str, conn: AsyncConnection):
     async with conn.cursor() as cur:
         response = await cur.execute(
             sql.SQL("INSERT INTO tags (tag_name) VALUES (%s) RETURNING tag_name;"),

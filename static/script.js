@@ -96,6 +96,31 @@ document.getElementById('cantonese-input').addEventListener('input', function ()
     }
 });
 
+// Adding tag when button clicked
+document.getElementById('add-tag-button').addEventListener('click', function (event) {
+    event.preventDefault(); // Prevent form submission
+
+    const requestBody = {
+        tag_name: document.getElementById('new-tag').value,
+    }
+
+    fetch('http://localhost:8000/tags', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            // Reload the page while preserving the query parameters
+            refreshPage();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+});
+
 // Inserting row when button clicked
 document.getElementById('add-button').addEventListener('click', function (event) {
     event.preventDefault(); // Prevent form submission
