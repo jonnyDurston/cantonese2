@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Examination</title>
+    <link rel="stylesheet" href="static/base.css">
+    <link rel="stylesheet" href="static/exam.css">
+</head>
+
+<body>
+
+    <div class="top-bar-wrapper">
+        <!-- Selecting tags -->
+        <label>Select tags to filter by:</label>
+        <div class="tag-container">
+            {% for tag in tags %}
+            <label>
+                {% if tag.checked %}
+                <input type="checkbox" class="tag-checkbox" value="{{ tag.tag_name }}" checked>
+                {% else %}
+                <input type="checkbox" class="tag-checkbox" value="{{ tag.tag_name }}">
+                {% endif %}
+                <span>{{ tag.tag_name }}</span>
+            </label>
+            {% endfor %}
+        </div>
+        <br>
+
+        <!-- Selecting language to test in -->
+        <label>Select language to examine in:</label>
+        <form id="language-selector">
+            <div>
+                {% if display_mode == 'cantonese' %}
+                <input type="radio" id="cantonese-radio-button" name="language" value="cantonese"
+                    class="language-checkbox" , checked />
+                {% else %}
+                <input type="radio" id="cantonese-radio-button" name="language" value="cantonese"
+                    class="language-checkbox" />
+                {% endif %}
+                <label for="cantonese-radio-button">Cantonese</label>
+            </div>
+            <div>
+                {% if display_mode == 'english' %}
+                <input type="radio" id="english-radio-button" name="language" value="english" class="language-checkbox"
+                    checked />
+                {% else %}
+                <input type="radio" id="english-radio-button" name="language" value="english"
+                    class="language-checkbox" />
+                {% endif %}
+
+                <label for="english-radio-button">English</label>
+            </div>
+        </form>
+
+    </div>
+
+    <!-- Displaying current question -->
+    <div class="main-body-wrapper">
+        <div id="exam-container">
+            <h1>Vocabulary Exam</h1>
+            <div id="question-box">
+                <p id="question-text">Loading...</p>
+                <button id="show-answer-btn">Show Answer</button>
+                <div id="answer-box" style="display: none;">
+                    <p id="answer-text"></p>
+                    <button id="correct-btn">Correct</button>
+                    <button id="incorrect-btn">Incorrect</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // If templating with Jinja2, insert vocab here
+        const VOCAB_LIST = {{ vocab | tojson }};
+        const DISPLAY_MODE = "{{ display_mode }}";  // "english" or "cantonese"
+    </script>
+    <script src="../static/exam.js" defer></script>
+</body>
+
+</html>

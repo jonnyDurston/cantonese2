@@ -8,9 +8,10 @@ from ..templates import get_jinja_templates
 from ..crud import get_all_tags, get_all_vocab, get_vocab_with_tags
 
 
-async def index(
+async def exam(
     request: Request,
     tags: str = "",
+    display_mode: str = "cantonese",
     conn: Connection = Depends(get_database_connection),
     templates: Jinja2Templates = Depends(get_jinja_templates),
 ):
@@ -29,5 +30,6 @@ async def index(
     random.shuffle(vocab)
 
     return templates.TemplateResponse(
-        "index.html", {"request": request, "vocab": vocab, "tags": all_tags}
+        "exam.html",
+        {"request": request, "vocab": vocab, "tags": all_tags, "display_mode": display_mode},
     )

@@ -1,5 +1,5 @@
+from aiosqlite import Connection
 from fastapi import Depends
-from psycopg import AsyncConnection
 
 from server.crud import insert_vocab, tag_vocab
 from server.database import get_database_connection
@@ -7,7 +7,7 @@ from ..models import POSTVocabulary
 
 
 async def insert_vocabulary(
-    data: POSTVocabulary, conn: AsyncConnection = Depends(get_database_connection)
+    data: POSTVocabulary, conn: Connection = Depends(get_database_connection)
 ):
     print("Received request payload", data.model_dump())
     vocab_details = await insert_vocab(data.cantonese, data.jyutping, data.english, conn)

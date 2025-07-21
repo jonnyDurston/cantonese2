@@ -1,63 +1,68 @@
-from psycopg import AsyncConnection, sql
+import json
+from aiosqlite import Connection
 
 
-async def get_all_vocab(conn: AsyncConnection):
+async def get_all_vocab(conn: Connection):
     async with conn.cursor() as cur:
         await cur.execute(
-            sql.SQL("SELECT cantonese, jyutping, english FROM vocabulary ORDER BY created_date")
+            "SELECT cantonese, jyutping, english FROM vocabulary ORDER BY created_date"
         )
-        return await cur.fetchall()
+        response = await cur.fetchall()
+        return [dict(item) for item in response]
 
 
-async def get_vocab_with_tags(tags: list[str], conn: AsyncConnection):
+async def get_vocab_with_tags(tags: list[str], conn: Connection):
     async with conn.cursor() as cur:
         await cur.execute(
-            sql.SQL(
-                """
-                WITH selected_tags AS (SELECT UNNEST(%s::TEXT[]) AS tag_name)
-                SELECT v.cantonese, v.jyutping, v.english FROM vocabulary v
-                JOIN vocabulary_tags vt ON v.vocab_id = vt.vocab_id
-                JOIN selected_tags st ON vt.tag_name = st.tag_name
-                GROUP BY v.cantonese, v.jyutping, v.english, v.created_date
-                HAVING COUNT(DISTINCT st.tag_name) = (SELECT COUNT(*) FROM selected_tags)
-                ORDER BY v.created_date;
-                """
-            ),
-            (tags,),
+            """
+            WITH sel(tag_name) AS (
+                SELECT value FROM json_each(?)
+            )
+            SELECT v.cantonese, v.jyutping, v.english
+            FROM vocabulary AS v
+            JOIN vocabulary_tags AS vt ON v.vocab_id = vt.vocab_id
+            JOIN sel ON vt.tag_name = sel.tag_name
+            GROUP BY v.vocab_id
+            HAVING COUNT(DISTINCT sel.tag_name) = (SELECT COUNT(*) FROM sel)
+            ORDER BY v.created_date;
+            """,
+            (json.dumps(tags),),
         )
-        return await cur.fetchall()
+        response = await cur.fetchall()
+        return [dict(item) for item in response]
 
 
-async def insert_vocab(cantonese: str, jyutping: str, english: str, conn: AsyncConnection):
+async def insert_vocab(cantonese: str, jyutping: str, english: str, conn: Connection):
     async with conn.cursor() as cur:
         response = await cur.execute(
-            sql.SQL(
-                "INSERT INTO vocabulary (cantonese, jyutping, english) VALUES (%s, %s, %s) RETURNING vocab_id;"
-            ),
+            "INSERT INTO vocabulary (cantonese, jyutping, english) VALUES (?, ?, ?) RETURNING vocab_id;",
             (cantonese, jyutping, english),
         )
-        return await response.fetchone()
+        response = await cur.fetchone()
+        return dict(response)
 
 
-async def get_all_tags(conn: AsyncConnection):
+async def get_all_tags(conn: Connection):
     async with conn.cursor() as cur:
-        await cur.execute(sql.SQL("SELECT tag_name FROM tags ORDER BY tag_name"))
-        return await cur.fetchall()
+        await cur.execute("SELECT tag_name FROM tags ORDER BY tag_name")
+        response = await cur.fetchall()
+        return [dict(item) for item in response]
 
 
-async def insert_tag(tag_name: str, conn: AsyncConnection):
+async def insert_tag(tag_name: str, conn: Connection):
     async with conn.cursor() as cur:
         response = await cur.execute(
-            sql.SQL("INSERT INTO tags (tag_name) VALUES (%s) RETURNING tag_name;"),
+            "INSERT INTO tags (tag_name) VALUES (?) RETURNING tag_name;",
             (tag_name,),
         )
-        return await response.fetchone()
+        response = await cur.fetchone()
+        return dict(response)
 
 
-async def tag_vocab(vocab_id: int, tags: list[str], conn: AsyncConnection):
+async def tag_vocab(vocab_id: int, tags: list[str], conn: Connection):
     async with conn.cursor() as cur:
         print([(vocab_id, tag_name) for tag_name in tags])
         await cur.executemany(
-            sql.SQL("INSERT INTO vocabulary_tags (vocab_id, tag_name) VALUES (%s, %s)"),
+            "INSERT INTO vocabulary_tags (vocab_id, tag_name) VALUES (?, ?)",
             [(vocab_id, tag_name) for tag_name in tags],
         )

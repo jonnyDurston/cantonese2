@@ -69,9 +69,25 @@ document.querySelector('.toggle-container').addEventListener('change', (event) =
 
 // Event delegation for revealing individual cells
 document.getElementById('main-table').addEventListener('click', (event) => {
-    if (event.target.tagName === 'TD' && event.target.classList.contains('hidden')) {
-        // Reveal clicked cell
-        event.target.classList.remove('hidden');
+    if (event.target.tagName === 'TD') {
+        if (event.target.classList.contains('hidden')) {
+            // Reveal clicked cell
+            event.target.classList.remove('hidden');
+
+            // Reveal all child nodes
+            for (const cell_span of event.target.querySelectorAll('span')) {
+                cell_span.classList.remove('hidden');
+            }
+        }
+        else {
+            // Hide clicked cell
+            event.target.classList.add('hidden');
+
+            // Hide all child nodes
+            for (const cell_span of event.target.querySelectorAll('span')) {
+                cell_span.classList.add('hidden');
+            }
+        }
     }
 });
 
