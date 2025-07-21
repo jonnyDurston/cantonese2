@@ -8,8 +8,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pycantonese import characters_to_jyutping
 
-from server.database import init_db_pool, shutdown_db_pool
-from server.routes import favicon, jyutping, insert_vocabulary, insert_tag
+from server.routes import exam, favicon, jyutping, insert_vocabulary, insert_tag
 
 
 @asynccontextmanager
@@ -17,18 +16,12 @@ async def lifespan(app: FastAPI):
     """
     Events for startup and shutdown of app
     """
-    await init_db_pool()
     # Hack to load cantonese corpus - do in side thread
     Thread(target=lambda: characters_to_jyutping(" ")).start()
     yield
-    await shutdown_db_pool()
 
 
 if __name__ == "__main__":
-
-    # https://www.psycopg.org/psycopg3/docs/advanced/async.html#async
-    if sys.platform == "win32":
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     import uvicorn
 
@@ -44,6 +37,7 @@ if __name__ == "__main__":
     from server.routes import index
 
     app.get("/index.html", response_class=HTMLResponse)(index)
+    app.get("/exam.html", response_class=HTMLResponse)(exam)
     app.get("/jyutping")(jyutping)
     app.post("/vocabulary")(insert_vocabulary)
     app.post("/tags")(insert_tag)
