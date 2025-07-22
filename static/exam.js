@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const showAnswerBtn = document.getElementById("show-answer-btn");
     const correctBtn = document.getElementById("correct-btn");
     const incorrectBtn = document.getElementById("incorrect-btn");
+    const progressBar = document.getElementById("progress-bar");
 
     // Helper function to color jyutping
     function formatJyutping(jyutping) {
@@ -25,7 +26,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function updateProgress() {
+        const total = VOCAB_LIST.length;
+        const asked = total - queue.length - incorrectQueue.length;
+        const percent = Math.round((asked / total) * 100);
+        progressBar.value = percent;
+        progressBar.textContent = `${percent}%`;
+    }
+
     function nextQuestion() {
+        updateProgress();
+
         if (queue.length === 0 && incorrectQueue.length > 0) {
             queue = [...incorrectQueue];
             incorrectQueue = [];
@@ -40,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         current = queue.shift();
+        showAnswerBtn.style.display = 'inline-block';
         answerBox.style.display = "none";
         answerText.textContent = "";
 
@@ -56,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             answerText.textContent = current.english;
         }
+        showAnswerBtn.style.display = 'none';
         answerBox.style.display = "block";
     });
 
@@ -66,6 +79,33 @@ document.addEventListener("DOMContentLoaded", () => {
     incorrectBtn.addEventListener("click", () => {
         incorrectQueue.push(current);
         nextQuestion();
+    });
+
+    // Adding in keyboard shortcuts for buttons 
+    document.addEventListener("keydown", (e) => {
+
+        // Prevent interfering with typing in form fields
+        if (e.target.matches("input, textarea")) {
+            return;
+        }
+        switch (e.key) {
+            case "Enter":
+                if (answerBox.style.display === "none") {
+                    showAnswerBtn.click();
+                } else {
+                    correctBtn.click()
+                }
+                break;
+            case "Shift":
+            case "'":
+            case "@":
+                if (answerBox.style.display === "none") {
+                    showAnswerBtn.click();
+                } else {
+                    incorrectBtn.click()
+                }
+                break;
+        }
     });
 
     shuffleArray(queue);

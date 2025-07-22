@@ -109,3 +109,21 @@ button {
 .jyutping-number-6 {
     color: rgb(115, 49, 103);
 }
+
+
+#progress-bar {
+    width: 100%;
+    height: 1.5rem;
+    margin-bottom: 1rem;
+    appearance: none;
+}
+
+#progress-bar::-webkit-progress-bar {
+    background-color: #e0e0e0;
+    border-radius: 0.75rem;
+}
+
+#progress-bar::-webkit-progress-value {
+    background-color: #007bff;
+    border-radius: 0.75rem;
+}
