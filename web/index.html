@@ -60,7 +60,7 @@
             <td>{{ phrase.english }}</td>
             {% if phrase.mp3_id %}
             <td>
-                <button onclick="playAudio('{{ phrase.mp3_id }}')">🔊 Play</button>
+                <button class="table-button" onclick="playAudio('{{ phrase.mp3_id }}')">▶</button>
                 <audio preload="none" id="audio-{{ phrase.mp3_id }}"
                     src="/static/audio/{{ phrase.mp3_id }}.mp3"></audio>
             </td>
@@ -75,7 +75,7 @@
                 <td><input type="text" name="cantonese" id="cantonese-input" autocomplete="one-time-code" required></td>
                 <td><input type="text" name="jyutping" id="jyutping-input" autocomplete="one-time-code" required></td>
                 <td><input type="text" name="english" id="english-input" autocomplete="one-time-code" required></td>
-                <td><button type="submit" class="add-button" id="add-button">+</button></td>
+                <td><button type="submit" class="table-button" id="add-button">+</button></td>
             </form>
         </tr>
 

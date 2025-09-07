@@ -1,3 +1,4 @@
+import re
 from uuid import uuid4
 from gtts import gTTS
 
@@ -6,7 +7,7 @@ def generate_cantonese_tts(cantonese: str):
     mp3_id = str(uuid4())
 
     # Remove any text in brackets before converting to speech
-    text = cantonese.split("(", maxsplit=1)[0]
+    text = re.sub(r"\([^)]*\)", "", cantonese)
 
     tts = gTTS(text=text, lang="yue")
     tts.save(f"static/audio/{mp3_id}.mp3")

@@ -62,6 +62,14 @@
     background-color: #e8ffe6;
 }
 
+/* Fourth column (Play sound button) */
+.language-table td:nth-child(4) {
+    border: none;
+    overflow: hidden;
+    width: 58px;
+    padding: 0px;
+}
+
 .language-table tbody tr:last-child td {
     padding: 0;
     margin: 0;
@@ -85,6 +93,7 @@
 .language-table tbody tr:last-child td:nth-child(1) {
     background-color: #000;
     font-size: 20px;
+    width: 100px;
 }
 
 .language-table tbody tr:last-child td:nth-child(2),
@@ -101,13 +110,14 @@
 .language-table tbody tr:last-child td:nth-child(4),
 .language-table tbody tr:last-child td:nth-child(4) input {
     background-color: #e8ffe6;
+    width: unset;
 }
 
 .language-table tbody tr:last-child td:last-child {
     border: none;
 }
 
-.add-button {
+.table-button {
     display: inline-block;
     margin-left: 5px;
     padding: 5px 10px;
@@ -119,6 +129,6 @@
     cursor: pointer;
 }
 
-.add-button:hover {
+.table-button:hover {
     background-color: darkgreen;
 }
