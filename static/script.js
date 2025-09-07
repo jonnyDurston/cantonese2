@@ -187,3 +187,12 @@ Array.from(document.getElementsByClassName('tag-checkbox')).forEach((checkbox) =
         refreshPage(url);
     })
 })
+
+// For playing audio
+function playAudio(mp3_id) {
+    const player = document.getElementById("audio-" + mp3_id);
+    if (player) {
+        console.log("Playing audio...")
+        player.play();
+    }
+}

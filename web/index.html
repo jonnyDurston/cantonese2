@@ -58,6 +58,13 @@
             <td>{{ phrase.cantonese }}</td>
             <td>{{ phrase.jyutping|colornum|safe }}</td>
             <td>{{ phrase.english }}</td>
+            {% if phrase.mp3_id %}
+            <td>
+                <button onclick="playAudio('{{ phrase.mp3_id }}')">🔊 Play</button>
+                <audio preload="none" id="audio-{{ phrase.mp3_id }}"
+                    src="/static/audio/{{ phrase.mp3_id }}.mp3"></audio>
+            </td>
+            {% endif %}
         </tr>
         {% endfor %}
 
@@ -73,10 +80,6 @@
         </tr>
 
     </table>
-
-    <p>
-        Here is some miscellaneous text because I'd like to test how it looks
-    </p>
 
     <script src="static/script.js"></script>
 

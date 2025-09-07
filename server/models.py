@@ -6,6 +6,7 @@ class POSTVocabulary(BaseModel):
     jyutping: str = Field(min_length=1)
     english: str = Field(min_length=1)
     tags: list[str] = []
+    generate_speech: bool = True
 
 
 class POSTTag(BaseModel):
