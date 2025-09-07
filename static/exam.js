@@ -34,6 +34,13 @@ document.addEventListener("DOMContentLoaded", () => {
         progressBar.textContent = `${percent}%`;
     }
 
+    function playSound(mp3_id) {
+        const audio = new Audio(`/static/audio/${mp3_id}.mp3`);
+        audio.play().catch(error => {
+            console.error('Audio playback failed:', error);
+        });
+    }
+
     function nextQuestion() {
         updateProgress();
 
@@ -59,12 +66,14 @@ document.addEventListener("DOMContentLoaded", () => {
             questionText.textContent = current.english;
         } else {
             questionText.innerHTML = `${current.cantonese} (${formatJyutping(current.jyutping)})`;
+            playSound(current.mp3_id);
         }
     }
 
     showAnswerBtn.addEventListener("click", () => {
         if (DISPLAY_MODE === "english") {
             answerText.innerHTML = `${current.cantonese} (${formatJyutping(current.jyutping)})`;
+            playSound(current.mp3_id);
         } else {
             answerText.textContent = current.english;
         }
