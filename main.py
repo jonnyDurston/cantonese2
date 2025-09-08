@@ -8,7 +8,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pycantonese import characters_to_jyutping
 
-from server.routes import exam, favicon, jyutping, insert_vocabulary, insert_tag
+from server.routes import exam, favicon, get_vocabulary, jyutping, insert_vocabulary, insert_tag
 
 
 @asynccontextmanager
@@ -39,6 +39,7 @@ if __name__ == "__main__":
     app.get("/index.html", response_class=HTMLResponse)(index)
     app.get("/exam.html", response_class=HTMLResponse)(exam)
     app.get("/jyutping")(jyutping)
+    app.get("/vocabulary")(get_vocabulary)
     app.post("/vocabulary")(insert_vocabulary)
     app.post("/tags")(insert_tag)
     app.mount("/static", StaticFiles(directory="static"), name="static")

@@ -52,32 +52,23 @@
     <!-- Table containing all our vocabulary -->
     <table class="language-table" id="main-table">
 
-        <!-- Contents of table pulled from db -->
-        {% for phrase in vocab %}
-        <tr>
-            <td>{{ phrase.cantonese }}</td>
-            <td>{{ phrase.jyutping|colornum|safe }}</td>
-            <td>{{ phrase.english }}</td>
-            {% if phrase.mp3_id %}
-            <td>
-                <button class="table-button" onclick="playAudio('{{ phrase.mp3_id }}')">▶</button>
-                <audio preload="none" id="audio-{{ phrase.mp3_id }}"
-                    src="/static/audio/{{ phrase.mp3_id }}.mp3"></audio>
-            </td>
-            {% endif %}
-        </tr>
-        {% endfor %}
+        <!-- Contents of table populated in script -->
+        <tbody id="main-table-body">
 
-        <!-- Additional row at bottom of table allows adding a new phrase -->
-        <!-- autocomplete="one-time-code" stops chrome autofilling (annoying) -->
-        <tr>
-            <form id="add-phrase">
-                <td><input type="text" name="cantonese" id="cantonese-input" autocomplete="one-time-code" required></td>
-                <td><input type="text" name="jyutping" id="jyutping-input" autocomplete="one-time-code" required></td>
-                <td><input type="text" name="english" id="english-input" autocomplete="one-time-code" required></td>
-                <td><button type="submit" class="table-button" id="add-button">+</button></td>
-            </form>
-        </tr>
+            <!-- Additional row at bottom of table allows adding a new phrase -->
+            <!-- autocomplete="one-time-code" stops chrome autofilling (annoying) -->
+            <tr id="add-phrase-tr">
+                <form id="add-phrase">
+                    <td><input type="text" name="cantonese" id="cantonese-input" autocomplete="one-time-code" required>
+                    </td>
+                    <td><input type="text" name="jyutping" id="jyutping-input" autocomplete="one-time-code" required>
+                    </td>
+                    <td><input type="text" name="english" id="english-input" autocomplete="one-time-code" required></td>
+                    <td><button type="submit" class="table-button" id="add-button">+</button></td>
+                </form>
+            </tr>
+
+        </tbody>
 
     </table>
 

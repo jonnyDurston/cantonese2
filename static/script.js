@@ -1,3 +1,66 @@
+document.addEventListener("DOMContentLoaded", () => {
+    loadTable();
+})
+
+function loadTable() {
+    const checkboxes = document.getElementsByClassName('tag-checkbox');
+    const selectedTags = Array.from(checkboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value);
+
+    const addPhraseRow = document.getElementById("add-phrase-tr")
+
+    fetch('http://localhost:8000/vocabulary?' + new URLSearchParams({ tags: selectedTags.join(",") }))
+        .then(response => response.json())
+        .then(vocabulary => {
+            const tableBody = document.getElementById("main-table-body");
+
+            for (let phrase of vocabulary) {
+                const tr = document.createElement("tr");
+
+                // Adding Cantonese
+                const canto_td = document.createElement("td");
+                canto_td.textContent = phrase["cantonese"];
+                tr.appendChild(canto_td);
+
+                // Adding Jyutping
+                const jyut_td = document.createElement("td");
+                jyut_td.innerHTML = phrase["jyutping"].replace(/\d+/g, (match) => {
+                    return `<span class="jyutping-number-${match}">${match}</span>`
+                });
+                tr.appendChild(jyut_td);
+
+                // Adding English
+                const english_td = document.createElement("td");
+                english_td.textContent = phrase["english"];
+                tr.appendChild(english_td);
+
+                // Adding MP3 play button (if applicable)
+                if (phrase["mp3_id"]) {
+                    const mp3_id_td = document.createElement("td");
+
+                    const play_button = document.createElement("button");
+                    var play_func = () => playAudio(phrase["mp3_id"]);
+                    play_button.className = "table-button";
+                    play_button.textContent = "▶";
+                    play_button.onclick = play_func;
+
+                    const audio = document.createElement("audio");
+                    audio.preload = "none";
+                    audio.id = "audio-" + phrase["mp3_id"]
+                    audio.src = "/static/audio/" + phrase["mp3_id"] + ".mp3";
+
+                    mp3_id_td.appendChild(play_button);
+                    mp3_id_td.appendChild(audio);
+                    tr.appendChild(mp3_id_td);
+                }
+
+                tableBody.insertBefore(tr, addPhraseRow)
+            }
+        });
+}
+
+
 // Helper function to toggle the visibility of a column
 function updateColumnVisibility(columnIndex, isVisible) {
     const table = document.getElementById('main-table');
