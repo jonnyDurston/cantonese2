@@ -15,7 +15,7 @@ async def main():
     async with aiosqlite.connect("vocabulary.db", isolation_level=None) as conn:
         conn.row_factory = aiosqlite.Row
 
-        vocab = await get_vocab_with_tags(["Adjectives"], conn)
+        vocab = await get_vocab_with_tags(["Verbs"], conn)
 
         for word in vocab:
             if word["mp3_id"]:
@@ -27,7 +27,7 @@ async def main():
                 "UPDATE vocabulary SET mp3_id = ? WHERE cantonese = ?",
                 (mp3_id, word["cantonese"]),
             )
-            sleep(random.random() * 5)
+            sleep(random.random())
 
             await conn.commit()
 
