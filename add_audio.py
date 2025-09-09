@@ -15,7 +15,7 @@ async def main():
     async with aiosqlite.connect("vocabulary.db", isolation_level=None) as conn:
         conn.row_factory = aiosqlite.Row
 
-        vocab = await get_vocab_with_tags(["New Year Greetings"], conn)
+        vocab = await get_vocab_with_tags(["Youtube 1-5"], conn)
 
         for word in vocab:
             if word["mp3_id"]:
