@@ -7,7 +7,7 @@ import random
 from time import sleep
 
 import aiosqlite
-from server.crud import get_vocab_with_tags
+from server.crud import get_all_vocab
 from server.speech import generate_cantonese_tts
 
 
@@ -15,7 +15,7 @@ async def main():
     async with aiosqlite.connect("vocabulary.db", isolation_level=None) as conn:
         conn.row_factory = aiosqlite.Row
 
-        vocab = await get_vocab_with_tags(["Youtube 1-5"], conn)
+        vocab = await get_all_vocab(conn)
 
         for word in vocab:
             if word["mp3_id"]:
