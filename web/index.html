@@ -4,49 +4,29 @@
 <head>
     <title>Vocabulary</title>
     <link rel="stylesheet" href="static/table.css">
+    <link rel="stylesheet" href="static/topbar.css">
     <link rel="stylesheet" href="static/base.css">
 </head>
 
 <body>
-    <h2>List of all vocabulary</h2>
+    <!-- Sticky top control bar -->
+    <div class="top-bar">
+        <div class="tag-filter-container">
+            <div class="tag-scroll" id="tagScroll">
 
-    <!-- Selecting tags -->
-    <label>Select tags to filter by:</label>
-    <div class="tag-container">
-        {% for tag in tags %}
-        <label>
-            {% if tag.checked %}
-            <input type="checkbox" class="tag-checkbox" value="{{ tag.tag_name }}" checked>
-            {% else %}
-            <input type="checkbox" class="tag-checkbox" value="{{ tag.tag_name }}">
-            {% endif %}
-            <span>{{ tag.tag_name }}</span>
-        </label>
-        {% endfor %}
-    </div>
+                <!-- Tag list populated in script -->
 
-    <!-- Input and button for adding new tags -->
-    <br><br>
-    <form id="add-tag">
-        <label for="new-tag">Add New Tag:</label>
-        <input type="text" id="new-tag" placeholder="Enter a new tag">
-        <button id="add-tag-button">Add Tag</button>
-    </form>
+            </div>
+        </div>
 
-    <!-- Allows toggling of visibilities -->
-    <div class="toggle-container">
-        <label>
-            <input type="radio" name="visibility" value="all" checked>
-            <span>All</span>
-        </label>
-        <label>
-            <input type="radio" name="visibility" value="english">
-            <span>English</span>
-        </label>
-        <label>
-            <input type="radio" name="visibility" value="cantonese">
-            <span>Cantonese</span>
-        </label>
+        <div class="tag-actions">
+            <input type="text" placeholder="Add new tag..." id="newTagInput">
+            <button id="addTagBtn">➕</button>
+        </div>
+
+        <div class="exam-button">
+            <a href="exam.html" class="exam-link">🧪 Go to Exam</a>
+        </div>
     </div>
 
     <!-- Table containing all our vocabulary -->
@@ -63,8 +43,9 @@
                     </td>
                     <td><input type="text" name="jyutping" id="jyutping-input" autocomplete="one-time-code" required>
                     </td>
-                    <td><input type="text" name="english" id="english-input" autocomplete="one-time-code" required></td>
-                    <td><button type="submit" class="table-button" id="add-button">+</button></td>
+                    <td><input type="text" name="english" id="english-input" autocomplete="one-time-code" required>
+                    </td>
+                    <td><button type="submit" class="table-button" id="add-button">➕</button></td>
                 </form>
             </tr>
 

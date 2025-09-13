@@ -1,13 +1,40 @@
 document.addEventListener("DOMContentLoaded", () => {
-    loadTable();
+    let params = new URLSearchParams(document.location.search);
+    let selectedTags = params.get("tags").split(",");
+
+    loadTags(selectedTags);
+    loadTable(selectedTags);
+    restoreScrollPos();
 })
 
-function loadTable() {
-    const checkboxes = document.getElementsByClassName('tag-checkbox');
-    const selectedTags = Array.from(checkboxes)
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => checkbox.value);
+function loadTags(selectedTags) {
+    fetch('http://localhost:8000/tags').then(response => response.json()).then(tags => {
+        const tagScroll = document.getElementById('tagScroll');
 
+        for (let tag of tags) {
+            const tagName = tag["tag_name"];
+
+            const tagLabel = document.createElement("label");
+            tagLabel.className = "tag-item";
+            tagLabel.textContent = " " + tagName;
+
+            const tagInput = document.createElement("input");
+            tagInput.className = "tag-checkbox";
+            tagInput.type = "checkbox";
+            tagInput.value = tagName;
+            if (selectedTags.includes(tagName)) {
+                tagInput.checked = true;
+            }
+            tagInput.addEventListener('change', tagChangeReload)
+
+            tagLabel.appendChild(tagInput);
+
+            tagScroll.appendChild(tagLabel);
+        }
+    });
+}
+
+function loadTable(selectedTags) {
     const addPhraseRow = document.getElementById("add-phrase-tr")
 
     fetch('http://localhost:8000/vocabulary?' + new URLSearchParams({ tags: selectedTags.join(",") }))
@@ -42,7 +69,7 @@ function loadTable() {
                     const play_button = document.createElement("button");
                     var play_func = () => playAudio(phrase["mp3_id"]);
                     play_button.className = "table-button";
-                    play_button.textContent = "▶";
+                    play_button.textContent = "🔊";
                     play_button.onclick = play_func;
 
                     const audio = document.createElement("audio");
@@ -61,32 +88,6 @@ function loadTable() {
 }
 
 
-// Helper function to toggle the visibility of a column
-function updateColumnVisibility(columnIndex, isVisible) {
-    const table = document.getElementById('main-table');
-    const rows = table.querySelectorAll('tr');
-
-    rows.forEach((row) => {
-        const cell = row.children[columnIndex - 1]; // Adjust for 0-based index
-        if (cell) {
-            const cell_spans = cell.querySelectorAll('span');
-            if (isVisible) {
-                // Reveals cell if desired behavior
-                cell.classList.remove('hidden');
-                cell_spans.forEach((span) => {
-                    span.classList.remove('hidden');
-                });
-            } else {
-                // Otherwise hides cell
-                cell.classList.add('hidden');
-                cell_spans.forEach((span) => {
-                    span.classList.add('hidden');
-                });
-            }
-        }
-    });
-}
-
 // Helper function for reloading the page and preserving the scroll location
 function refreshPage(url = null) {
     sessionStorage.setItem('scrollpos', window.scrollY);
@@ -99,60 +100,14 @@ function refreshPage(url = null) {
 }
 
 // Ensuring that on reload we go to the desired scroll position if necessary
-document.addEventListener("DOMContentLoaded", function (event) {
+function restoreScrollPos() {
     var scrollpos = sessionStorage.getItem('scrollpos');
     if (scrollpos) {
         window.scrollTo(0, scrollpos);
         sessionStorage.removeItem('scrollpos')
     }
-});
+}
 
-// For different visibility toggles
-document.querySelector('.toggle-container').addEventListener('change', (event) => {
-    const selectedValue = event.target.value;
-
-    switch (selectedValue) {
-        case 'all':
-            updateColumnVisibility(1, true);
-            updateColumnVisibility(2, true);
-            updateColumnVisibility(3, true);
-            break;
-        case 'english':
-            updateColumnVisibility(1, false);
-            updateColumnVisibility(2, false);
-            updateColumnVisibility(3, true);
-            break;
-        case 'cantonese':
-            updateColumnVisibility(1, true);
-            updateColumnVisibility(2, true);
-            updateColumnVisibility(3, false);
-            break;
-    }
-});
-
-// Event delegation for revealing individual cells
-document.getElementById('main-table').addEventListener('click', (event) => {
-    if (event.target.tagName === 'TD') {
-        if (event.target.classList.contains('hidden')) {
-            // Reveal clicked cell
-            event.target.classList.remove('hidden');
-
-            // Reveal all child nodes
-            for (const cell_span of event.target.querySelectorAll('span')) {
-                cell_span.classList.remove('hidden');
-            }
-        }
-        else {
-            // Hide clicked cell
-            event.target.classList.add('hidden');
-
-            // Hide all child nodes
-            for (const cell_span of event.target.querySelectorAll('span')) {
-                cell_span.classList.add('hidden');
-            }
-        }
-    }
-});
 
 // Getting jyutping from backend and populating input
 document.getElementById('cantonese-input').addEventListener('input', function () {
@@ -173,31 +128,6 @@ document.getElementById('cantonese-input').addEventListener('input', function ()
                 console.error('Error fetching data:', error);
             });
     }
-});
-
-// Adding tag when button clicked
-document.getElementById('add-tag-button').addEventListener('click', function (event) {
-    event.preventDefault(); // Prevent form submission
-
-    const requestBody = {
-        tag_name: document.getElementById('new-tag').value,
-    }
-
-    fetch('http://localhost:8000/tags', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-            // Reload the page while preserving the query parameters
-            refreshPage();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
 });
 
 // Inserting row when button clicked
@@ -232,25 +162,6 @@ document.getElementById('add-button').addEventListener('click', function (event)
         });
 });
 
-// Reloading the page when checkbox is ticked
-Array.from(document.getElementsByClassName('tag-checkbox')).forEach((checkbox) => {
-    checkbox.addEventListener('change', function () {
-        const checkboxes = document.getElementsByClassName('tag-checkbox');
-        const selectedTags = Array.from(checkboxes)
-            .filter(checkbox => checkbox.checked)
-            .map(checkbox => checkbox.value)
-
-        const url = new URL(window.location);
-        if (selectedTags.length > 0) {
-            url.searchParams.set('tags', selectedTags.join(','));
-        } else {
-            url.searchParams.delete('tags');
-        }
-
-        refreshPage(url);
-    })
-})
-
 // For playing audio
 function playAudio(mp3_id) {
     const player = document.getElementById("audio-" + mp3_id);
@@ -258,4 +169,47 @@ function playAudio(mp3_id) {
         console.log("Playing audio...")
         player.play();
     }
+}
+
+
+// Adding tag when button clicked
+document.getElementById('addTagBtn').addEventListener('click', function (event) {
+    event.preventDefault(); // Prevent form submission
+
+    const requestBody = {
+        tag_name: document.getElementById('newTagInput').value,
+    }
+
+    fetch('http://localhost:8000/tags', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            // Reload the page while preserving the query parameters
+            refreshPage();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+});
+
+// Reloading the page when checkbox is ticked
+function tagChangeReload() {
+    const checkboxes = document.getElementsByClassName('tag-checkbox');
+    const selectedTags = Array.from(checkboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value)
+
+    const url = new URL(window.location);
+    if (selectedTags.length > 0) {
+        url.searchParams.set('tags', selectedTags.join(','));
+    } else {
+        url.searchParams.delete('tags');
+    }
+
+    refreshPage(url);
 }

@@ -1,0 +1,109 @@
+body {
+    margin: 0;
+}
+
+/* Sticky top bar */
+.top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: #f0f4f8;
+    padding: 10px 20px;
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Tag filter section */
+.tag-filter-container {
+    flex: 1 1 300px;
+}
+
+.filter-label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.tag-scroll {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    max-height: 108px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 5px 0;
+}
+
+.tag-scroll::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+
+.tag-scroll::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.tag-item {
+    white-space: nowrap;
+    background: #fff;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Add new tag section */
+.tag-actions {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 10px;
+}
+
+#newTagInput {
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    width: 160px;
+}
+
+#addTagBtn {
+    background-color: lightgrey;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 25%;
+    cursor: pointer;
+}
+
+#addTagBtn:hover {
+    background-color: grey;
+
+}
+
+/* Exam button section */
+.exam-button {
+    flex: 0 0 auto;
+}
+
+.exam-link {
+    background-color: #1976d2;
+    color: white;
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.exam-link:hover {
+    background-color: #1565c0;
+}
+
+/* Main content area (vocab table) */
+.main-content {
+    padding: 20px;
+}

@@ -3,31 +3,33 @@
 
 <head>
     <title>Examination</title>
-    <link rel="stylesheet" href="static/base.css">
     <link rel="stylesheet" href="static/exam.css">
+    <link rel="stylesheet" href="static/topbar.css">
+    <link rel="stylesheet" href="static/base.css">
 </head>
 
 <body>
 
-    <div class="top-bar-wrapper">
-        <!-- Selecting tags -->
-        <label>Select tags to filter by:</label>
-        <div class="tag-container">
-            {% for tag in tags %}
-            <label>
+    <!-- Sticky top control bar -->
+    <div class="top-bar">
+        <div class="tag-filter-container">
+            <div class="tag-scroll">
+
+                {% for tag in tags %}
                 {% if tag.checked %}
-                <input type="checkbox" class="tag-checkbox" value="{{ tag.tag_name }}" checked>
+                <label class="tag-item">
+                    <input type="checkbox" class="tag-checkbox" value="{{ tag.tag_name }}" checked> {{ tag.tag_name}}
+                </label>
                 {% else %}
-                <input type="checkbox" class="tag-checkbox" value="{{ tag.tag_name }}">
+                <label class="tag-item">
+                    <input type="checkbox" class="tag-checkbox" value="{{ tag.tag_name }}"> {{ tag.tag_name}}
+                </label>
                 {% endif %}
-                <span>{{ tag.tag_name }}</span>
-            </label>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
-        <br>
 
         <!-- Selecting language to test in -->
-        <label>Select language to examine in:</label>
         <form id="language-selector">
             <div>
                 {% if display_mode == 'cantonese' %}
@@ -52,6 +54,9 @@
             </div>
         </form>
 
+        <div class="exam-button">
+            <a href="exam.html" class="exam-link">📝 Go to Vocab</a>
+        </div>
     </div>
 
     <!-- Displaying current question -->
