@@ -37,7 +37,7 @@ async def insert_vocab(
 ):
     async with conn.cursor() as cur:
         response = await cur.execute(
-            "INSERT INTO vocabulary (cantonese, jyutping, english, mp3_id) VALUES (?, ?, ?, ?) RETURNING vocab_id;",
+            "INSERT INTO vocabulary (cantonese, jyutping, english, mp3_id) VALUES (?, ?, ?, ?) RETURNING cantonese, jyutping, english, mp3_id;",
             (cantonese, jyutping, english, mp3_id),
         )
         response = await cur.fetchone()

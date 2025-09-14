@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     let params = new URLSearchParams(document.location.search);
-    let selectedTags = params.get("tags").split(",");
+    let selectedTags = (params.get("tags") || "").split(",").filter(e => e !== '');
 
     loadTags(selectedTags);
     loadTable(selectedTags);
@@ -43,60 +43,78 @@ function loadTable(selectedTags) {
             const tableBody = document.getElementById("main-table-body");
 
             for (let phrase of vocabulary) {
-                const tr = document.createElement("tr");
-
-                // Adding Cantonese
-                const canto_td = document.createElement("td");
-                canto_td.textContent = phrase["cantonese"];
-                tr.appendChild(canto_td);
-
-                // Adding Jyutping
-                const jyut_td = document.createElement("td");
-                jyut_td.innerHTML = phrase["jyutping"].replace(/\d+/g, (match) => {
-                    return `<span class="jyutping-number-${match}">${match}</span>`
-                });
-                tr.appendChild(jyut_td);
-
-                // Adding English
-                const english_td = document.createElement("td");
-                english_td.textContent = phrase["english"];
-                tr.appendChild(english_td);
-
-                // Adding MP3 play button (if applicable)
-                if (phrase["mp3_id"]) {
-                    const mp3_id_td = document.createElement("td");
-
-                    const play_button = document.createElement("button");
-                    var play_func = () => playAudio(phrase["mp3_id"]);
-                    play_button.className = "table-button";
-                    play_button.textContent = "🔊";
-                    play_button.onclick = play_func;
-
-                    const audio = document.createElement("audio");
-                    audio.preload = "none";
-                    audio.id = "audio-" + phrase["mp3_id"]
-                    audio.src = "/static/audio/" + phrase["mp3_id"] + ".mp3";
-
-                    mp3_id_td.appendChild(play_button);
-                    mp3_id_td.appendChild(audio);
-                    tr.appendChild(mp3_id_td);
-                }
-
+                tr = createRow(phrase["cantonese"], phrase["jyutping"], phrase["english"], phrase["mp3_id"])
                 tableBody.insertBefore(tr, addPhraseRow)
             }
         });
 }
 
+function createRow(cantonese, jyutping, english, mp3_id) {
+    const tr = document.createElement("tr");
 
-// Helper function for reloading the page and preserving the scroll location
-function refreshPage(url = null) {
-    sessionStorage.setItem('scrollpos', window.scrollY);
-    if (url) {
-        window.location.href = url;
-    } else {
-        const currentUrl = new URL(window.location.href);
-        window.location.href = currentUrl.toString();
+    // Adding Cantonese
+    const canto_td = document.createElement("td");
+    canto_td.textContent = cantonese;
+    tr.appendChild(canto_td);
+
+    // Adding Jyutping
+    const jyut_td = document.createElement("td");
+    jyut_td.innerHTML = jyutping.replace(/\d+/g, (match) => {
+        return `<span class="jyutping-number-${match}">${match}</span>`
+    });
+    tr.appendChild(jyut_td);
+
+    // Adding English
+    const english_td = document.createElement("td");
+    english_td.textContent = english;
+    tr.appendChild(english_td);
+
+    // Adding MP3 play button (if applicable)
+    if (mp3_id) {
+        const mp3_id_td = document.createElement("td");
+
+        const play_button = document.createElement("button");
+        var play_func = () => playAudio(mp3_id);
+        play_button.className = "table-button";
+        play_button.textContent = "🔊";
+        play_button.onclick = play_func;
+
+        const audio = document.createElement("audio");
+        audio.preload = "none";
+        audio.id = "audio-" + mp3_id
+        audio.src = "/static/audio/" + mp3_id + ".mp3";
+
+        mp3_id_td.appendChild(play_button);
+        mp3_id_td.appendChild(audio);
+        tr.appendChild(mp3_id_td);
     }
+
+    return tr
+}
+
+
+// Helper function for reloading the top bar
+function refreshTopBar(selectedTags) {
+    const tagScroll = document.getElementById("tagScroll");
+    while (tagScroll.firstChild) {
+        tagScroll.removeChild(tagScroll.firstChild);
+    }
+
+    loadTags(selectedTags);
+}
+
+// Helper function for reloading the table and preserving the scroll location
+function refreshTable(selectedTags) {
+    sessionStorage.setItem('scrollpos', window.scrollY);
+
+    const tableBody = document.getElementById("main-table-body");
+    const rows = Array.from(tableBody.rows);
+
+    for (let i = 0; i < rows.length - 1; i++) {
+        tableBody.removeChild(rows[i]);
+    }
+
+    loadTable(selectedTags);
 }
 
 // Ensuring that on reload we go to the desired scroll position if necessary
@@ -138,10 +156,15 @@ document.getElementById('add-button').addEventListener('click', function (event)
     const selectedTags = Array.from(checkboxes)
         .filter(checkbox => checkbox.checked)
         .map(checkbox => checkbox.value)
+
+    const cantoneseInput = document.getElementById('cantonese-input');
+    const jyutpingInput = document.getElementById('jyutping-input');
+    const englishInput = document.getElementById('english-input');
+
     const requestBody = {
-        cantonese: document.getElementById('cantonese-input').value,
-        jyutping: document.getElementById('jyutping-input').value,
-        english: document.getElementById('english-input').value,
+        cantonese: cantoneseInput.value,
+        jyutping: jyutpingInput.value,
+        english: englishInput.value,
         tags: selectedTags
     }
 
@@ -154,8 +177,21 @@ document.getElementById('add-button').addEventListener('click', function (event)
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);
             }
+
+            return response.json()
+        }).then(json => {
             // Reload the page while preserving the query parameters
-            refreshPage();
+            const addPhraseRow = document.getElementById("add-phrase-tr");
+            const tableBody = document.getElementById("main-table-body");
+            tr = createRow(json["cantonese"], json["jyutping"], json["english"], json["mp3_id"]);
+            tableBody.insertBefore(tr, addPhraseRow);
+
+            // Empty the input boxes
+            cantoneseInput.value = "";
+            jyutpingInput.value = "";
+            englishInput.value = "";
+
+            // Scroll down 
         })
         .catch(error => {
             console.error('Error:', error);
@@ -179,6 +215,10 @@ document.getElementById('addTagBtn').addEventListener('click', function (event) 
     const requestBody = {
         tag_name: document.getElementById('newTagInput').value,
     }
+    const checkboxes = document.getElementsByClassName('tag-checkbox');
+    const selectedTags = Array.from(checkboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value)
 
     fetch('http://localhost:8000/tags', {
         method: 'POST',
@@ -190,7 +230,7 @@ document.getElementById('addTagBtn').addEventListener('click', function (event) 
                 throw new Error('Network response was not ok ' + response.statusText);
             }
             // Reload the page while preserving the query parameters
-            refreshPage();
+            refreshTopBar(selectedTags);
         })
         .catch(error => {
             console.error('Error:', error);
@@ -211,5 +251,5 @@ function tagChangeReload() {
         url.searchParams.delete('tags');
     }
 
-    refreshPage(url);
+    refreshTable(selectedTags);
 }
