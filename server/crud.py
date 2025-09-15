@@ -49,7 +49,7 @@ async def update_vocab(
 ):
     async with conn.cursor() as cur:
         response = await cur.execute(
-            "UPDATE vocabulary SET cantonese = ?, jyutping = ?, english = ?, mp3_id = ? WHERE vocab_id = ?",
+            "UPDATE vocabulary SET cantonese = ?, jyutping = ?, english = ?, mp3_id = ? WHERE vocab_id = ? RETURNING vocab_id, cantonese, jyutping, english, mp3_id;",
             (cantonese, jyutping, english, mp3_id, vocab_id),
         )
         response = await cur.fetchone()

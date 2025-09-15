@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadTags(selectedTags);
     loadTable(selectedTags);
-    restoreScrollPos();
 })
 
 function loadTags(selectedTags) {
@@ -51,13 +50,14 @@ function loadTable(selectedTags) {
 
 function createRow(vocab_id, cantonese, jyutping, english, mp3_id) {
     const tr = document.createElement("tr");
-    const rowId = "tr" + vocab_id
-    tr.id = rowId
+    const rowId = `tr-${crypto.randomUUID()}`;
+    tr.id = rowId;
+    tr.dataset.vocab_id = vocab_id;  // Store vocab_id if necessary
 
     // Adding Cantonese
     const canto_td = document.createElement("td");
     canto_td.textContent = cantonese;
-    var update_jyutping_func = () => updateJyutping(vocab_id);
+    var update_jyutping_func = () => updateJyutping(tr);
     canto_td.addEventListener('input', update_jyutping_func);
     tr.appendChild(canto_td);
 
@@ -100,7 +100,7 @@ function createRow(vocab_id, cantonese, jyutping, english, mp3_id) {
     const edit_row_td = document.createElement("td");
 
     const edit_button = document.createElement("button");
-    var edit_func = () => editRow(vocab_id);
+    var edit_func = () => editRow(tr);
     edit_button.className = "table-button";
     edit_button.textContent = "✏️";
     edit_button.onclick = edit_func;
@@ -112,7 +112,7 @@ function createRow(vocab_id, cantonese, jyutping, english, mp3_id) {
     const delete_row_td = document.createElement("td");
 
     const delete_button = document.createElement("button");
-    var delete_func = () => deleteRow(vocab_id);
+    var delete_func = () => deleteRow(tr);
     delete_button.className = "table-button";
     delete_button.textContent = "🗑️";
     delete_button.onclick = delete_func;
@@ -123,6 +123,20 @@ function createRow(vocab_id, cantonese, jyutping, english, mp3_id) {
 
     return tr
 }
+
+// Function for creating empty row when button clicked
+document.getElementById('add-button').addEventListener('click', function () {
+    console.log("aaaaaa")
+    tr = createRow("", "", "", "", null);
+
+    const tableBody = document.getElementById("main-table-body");
+    const addPhraseRow = document.getElementById("add-phrase-tr");
+    tableBody.insertBefore(tr, addPhraseRow);
+
+    editRow(tr);
+
+    window.scrollTo(0, document.body.scrollHeight);
+});
 
 // Helper function for reloading the top bar
 function refreshTopBar(selectedTags) {
@@ -148,96 +162,15 @@ function refreshTable(selectedTags) {
     loadTable(selectedTags);
 }
 
-// Ensuring that on reload we go to the desired scroll position if necessary
-function restoreScrollPos() {
-    var scrollpos = sessionStorage.getItem('scrollpos');
-    if (scrollpos) {
-        window.scrollTo(0, scrollpos);
-        sessionStorage.removeItem('scrollpos')
-    }
-}
-
-
-// Getting jyutping from backend and populating input
-document.getElementById('cantonese-input').addEventListener('input', function () {
-    const cantoneseCharacters = this.value;
-
-    // Only make a request if there's input value
-    if (cantoneseCharacters) {
-        fetch(`http://localhost:8000/jyutping?characters=${cantoneseCharacters}`)
-            .then(response => response.json()) // Assume JSON response
-            .then(data => {
-                // Check if the response contains the 'foo' key
-                if (data.jyutping) {
-                    document.getElementById('jyutping-input').value = data.jyutping;
-                }
-            })
-            .catch(error => {
-                // If error then don't try and change what's in the box
-                console.error('Error fetching data:', error);
-            });
-    }
-});
-
-// Inserting row when button clicked
-document.getElementById('add-button').addEventListener('click', function (event) {
-    event.preventDefault(); // Prevent form submission
-
-    const checkboxes = document.getElementsByClassName('tag-checkbox');
-    const selectedTags = Array.from(checkboxes)
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => checkbox.value)
-
-    const cantoneseInput = document.getElementById('cantonese-input');
-    const jyutpingInput = document.getElementById('jyutping-input');
-    const englishInput = document.getElementById('english-input');
-
-    const requestBody = {
-        cantonese: cantoneseInput.value,
-        jyutping: jyutpingInput.value,
-        english: englishInput.value,
-        tags: selectedTags
-    }
-
-    fetch('http://localhost:8000/vocabulary', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-
-            return response.json()
-        }).then(json => {
-            // Reload the page while preserving the query parameters
-            const addPhraseRow = document.getElementById("add-phrase-tr");
-            const tableBody = document.getElementById("main-table-body");
-            tr = createRow(json["vocab_id"], json["cantonese"], json["jyutping"], json["english"], json["mp3_id"]);
-            tableBody.insertBefore(tr, addPhraseRow);
-
-            // Empty the input boxes
-            cantoneseInput.value = "";
-            jyutpingInput.value = "";
-            englishInput.value = "";
-
-            // Scroll down 
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-});
-
 // For editing existing rows
-function editRow(vocab_id) {
-    tr = document.getElementById("tr" + vocab_id);
+function editRow(tr) {
     const cells = tr.querySelectorAll("td");
+    const vocab_id = tr.dataset.vocab_id;
 
     if (cells[4].firstChild.textContent === "💾") {
-        cantonese = cells[0].textContent;
-        jyutping = cells[1].textContent;
-        cantonese = cells[2].textContent;
+        const cantonese = cells[0].textContent;
+        const jyutping = cells[1].textContent;
+        const english = cells[2].textContent;
 
         cells[0].contentEditable = "false";
         cells[1].contentEditable = "false";
@@ -248,6 +181,52 @@ function editRow(vocab_id) {
         cells[1].innerHTML = jyutping.replace(/\d+/g, (match) => {
             return `<span class="jyutping-number-${match}">${match}</span>`
         });
+
+        const checkboxes = document.getElementsByClassName('tag-checkbox');
+        const selectedTags = Array.from(checkboxes)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value)
+
+        const requestBody = {
+            cantonese: cantonese,
+            jyutping: jyutping,
+            english: english,
+            tags: selectedTags
+        }
+
+        const method = vocab_id === "" ? 'POST' : 'PATCH';
+        const url = vocab_id === "" ? 'http://localhost:8000/vocabulary' : 'http://localhost:8000/vocabulary/' + vocab_id;
+
+        fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+
+                return response.json()
+            }).then(json => {
+                if (vocab_id == null) {
+                    tr.dataset.vocab_id = json['vocab_id'];
+
+                    // Adding audio (if successful)
+                    var play_func = () => playAudio(mp3_id);
+                    cells[3].onclick = play_func;
+
+                    if (mp3_id) {
+                        const audio = document.createElement("audio");
+                        audio.preload = "none";
+                        audio.id = "audio-" + json['mp3_id'];
+                        audio.src = "/static/audio/" + json['mp3_id'] + ".mp3";
+
+                        cells[3].appendChild(audio);
+                    }
+
+                }
+            });
     }
     else {
         cells[0].contentEditable = "true";
@@ -259,10 +238,7 @@ function editRow(vocab_id) {
 }
 
 // For dynamically populating jyutping
-function updateJyutping(vocab_id) {
-    console.log("Vocab ID " + vocab_id);
-
-    tr = document.getElementById("tr" + vocab_id);
+function updateJyutping(tr) {
     const cells = tr.querySelectorAll("td");
     cantoneseCharacters = cells[0].innerHTML;
 

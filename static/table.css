@@ -92,30 +92,9 @@
 /* Re-adding specific column stylings for final row */
 
 .language-table tbody tr:last-child td:nth-child(1) {
-    background-color: #000;
-    font-size: 20px;
-    width: 100px;
-}
-
-.language-table tbody tr:last-child td:nth-child(2),
-.language-table tbody tr:last-child td:nth-child(2) input {
-    background-color: #ffebcd;
-    font-size: 20px;
-}
-
-.language-table tbody tr:last-child td:nth-child(3),
-.language-table tbody tr:last-child td:nth-child(3) input {
-    background-color: #e6f7ff;
-}
-
-.language-table tbody tr:last-child td:nth-child(4),
-.language-table tbody tr:last-child td:nth-child(4) input {
-    background-color: #e8ffe6;
-    width: unset;
-}
-
-.language-table tbody tr:last-child td:last-child {
+    background-color: initial;
     border: none;
+    font-size: 20px;
 }
 
 .table-button {
@@ -132,4 +111,9 @@
 
 .table-button:hover {
     background-color: grey;
+}
+
+#add-button {
+    width: 100%;
+    border-radius: 5px;
 }

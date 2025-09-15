@@ -46,7 +46,8 @@ async def patch_vocabulary(
     vocab_id: str, data: POSTVocabulary, conn: Connection = Depends(get_database_connection)
 ):
     print(f"Updating {vocab_id} with payload {data}")
+    mp3_id = None
     # if data.generate_speech:
     #     mp3_id = generate_cantonese_tts(data.cantonese)
 
-    await update_vocab(vocab_id, data.cantonese, data.jyutping, data.english)
+    return await update_vocab(vocab_id, data.cantonese, data.jyutping, data.english, mp3_id, conn)
