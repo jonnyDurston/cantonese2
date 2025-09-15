@@ -5,7 +5,7 @@ from aiosqlite import Connection
 async def get_all_vocab(conn: Connection):
     async with conn.cursor() as cur:
         await cur.execute(
-            "SELECT cantonese, jyutping, english, mp3_id FROM vocabulary ORDER BY created_date"
+            "SELECT vocab_id, cantonese, jyutping, english, mp3_id FROM vocabulary ORDER BY created_date"
         )
         response = await cur.fetchall()
         return [dict(item) for item in response]
@@ -18,7 +18,7 @@ async def get_vocab_with_tags(tags: list[str], conn: Connection):
             WITH sel(tag_name) AS (
                 SELECT value FROM json_each(?)
             )
-            SELECT v.cantonese, v.jyutping, v.english, v.mp3_id
+            SELECT v.vocab_id, v.cantonese, v.jyutping, v.english, v.mp3_id
             FROM vocabulary AS v
             JOIN vocabulary_tags AS vt ON v.vocab_id = vt.vocab_id
             JOIN sel ON vt.tag_name = sel.tag_name
@@ -37,8 +37,30 @@ async def insert_vocab(
 ):
     async with conn.cursor() as cur:
         response = await cur.execute(
-            "INSERT INTO vocabulary (cantonese, jyutping, english, mp3_id) VALUES (?, ?, ?, ?) RETURNING cantonese, jyutping, english, mp3_id;",
+            "INSERT INTO vocabulary (cantonese, jyutping, english, mp3_id) VALUES (?, ?, ?, ?) RETURNING vocab_id, cantonese, jyutping, english, mp3_id;",
             (cantonese, jyutping, english, mp3_id),
+        )
+        response = await cur.fetchone()
+        return dict(response)
+
+
+async def update_vocab(
+    vocab_id: str, cantonese: str, jyutping: str, english: str, mp3_id: str | None, conn: Connection
+):
+    async with conn.cursor() as cur:
+        response = await cur.execute(
+            "UPDATE vocabulary SET cantonese = ?, jyutping = ?, english = ?, mp3_id = ? WHERE vocab_id = ?",
+            (cantonese, jyutping, english, mp3_id, vocab_id),
+        )
+        response = await cur.fetchone()
+        return dict(response)
+
+
+async def delete_vocab(vocab_id: str, conn: Connection):
+    async with conn.cursor() as cur:
+        response = await cur.execute(
+            "DELETE FROM vocabulary WHERE vocab_id = ?",
+            (vocab_id,),
         )
         response = await cur.fetchone()
         return dict(response)

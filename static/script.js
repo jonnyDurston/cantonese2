@@ -43,22 +43,27 @@ function loadTable(selectedTags) {
             const tableBody = document.getElementById("main-table-body");
 
             for (let phrase of vocabulary) {
-                tr = createRow(phrase["cantonese"], phrase["jyutping"], phrase["english"], phrase["mp3_id"])
+                tr = createRow(phrase["vocab_id"], phrase["cantonese"], phrase["jyutping"], phrase["english"], phrase["mp3_id"])
                 tableBody.insertBefore(tr, addPhraseRow)
             }
         });
 }
 
-function createRow(cantonese, jyutping, english, mp3_id) {
+function createRow(vocab_id, cantonese, jyutping, english, mp3_id) {
     const tr = document.createElement("tr");
+    const rowId = "tr" + vocab_id
+    tr.id = rowId
 
     // Adding Cantonese
     const canto_td = document.createElement("td");
     canto_td.textContent = cantonese;
+    var update_jyutping_func = () => updateJyutping(vocab_id);
+    canto_td.addEventListener('input', update_jyutping_func);
     tr.appendChild(canto_td);
 
     // Adding Jyutping
     const jyut_td = document.createElement("td");
+    jyut_td.dataset.raw = jyutping;  // Store raw text for edit mode
     jyut_td.innerHTML = jyutping.replace(/\d+/g, (match) => {
         return `<span class="jyutping-number-${match}">${match}</span>`
     });
@@ -69,29 +74,55 @@ function createRow(cantonese, jyutping, english, mp3_id) {
     english_td.textContent = english;
     tr.appendChild(english_td);
 
-    // Adding MP3 play button (if applicable)
+    // Adding MP3 play button
+    const mp3_id_td = document.createElement("td");
+
+    const play_button = document.createElement("button");
+    var play_func = () => playAudio(mp3_id);
+    play_button.className = "table-button";
+    play_button.textContent = "🔊";
+    play_button.onclick = play_func;
+
+    mp3_id_td.appendChild(play_button);
+
     if (mp3_id) {
-        const mp3_id_td = document.createElement("td");
-
-        const play_button = document.createElement("button");
-        var play_func = () => playAudio(mp3_id);
-        play_button.className = "table-button";
-        play_button.textContent = "🔊";
-        play_button.onclick = play_func;
-
         const audio = document.createElement("audio");
         audio.preload = "none";
         audio.id = "audio-" + mp3_id
         audio.src = "/static/audio/" + mp3_id + ".mp3";
 
-        mp3_id_td.appendChild(play_button);
         mp3_id_td.appendChild(audio);
-        tr.appendChild(mp3_id_td);
     }
+
+    tr.appendChild(mp3_id_td);
+
+    // Adding edit row button
+    const edit_row_td = document.createElement("td");
+
+    const edit_button = document.createElement("button");
+    var edit_func = () => editRow(vocab_id);
+    edit_button.className = "table-button";
+    edit_button.textContent = "✏️";
+    edit_button.onclick = edit_func;
+
+    edit_row_td.appendChild(edit_button);
+    tr.appendChild(edit_row_td)
+
+    // Adding delete row button
+    const delete_row_td = document.createElement("td");
+
+    const delete_button = document.createElement("button");
+    var delete_func = () => deleteRow(vocab_id);
+    delete_button.className = "table-button";
+    delete_button.textContent = "🗑️";
+    delete_button.onclick = delete_func;
+
+    delete_row_td.appendChild(delete_button);
+    tr.appendChild(delete_row_td)
+
 
     return tr
 }
-
 
 // Helper function for reloading the top bar
 function refreshTopBar(selectedTags) {
@@ -183,7 +214,7 @@ document.getElementById('add-button').addEventListener('click', function (event)
             // Reload the page while preserving the query parameters
             const addPhraseRow = document.getElementById("add-phrase-tr");
             const tableBody = document.getElementById("main-table-body");
-            tr = createRow(json["cantonese"], json["jyutping"], json["english"], json["mp3_id"]);
+            tr = createRow(json["vocab_id"], json["cantonese"], json["jyutping"], json["english"], json["mp3_id"]);
             tableBody.insertBefore(tr, addPhraseRow);
 
             // Empty the input boxes
@@ -198,8 +229,66 @@ document.getElementById('add-button').addEventListener('click', function (event)
         });
 });
 
+// For editing existing rows
+function editRow(vocab_id) {
+    tr = document.getElementById("tr" + vocab_id);
+    const cells = tr.querySelectorAll("td");
+
+    if (cells[4].firstChild.textContent === "💾") {
+        cantonese = cells[0].textContent;
+        jyutping = cells[1].textContent;
+        cantonese = cells[2].textContent;
+
+        cells[0].contentEditable = "false";
+        cells[1].contentEditable = "false";
+        cells[2].contentEditable = "false";
+        cells[4].firstChild.textContent = "✏️";
+
+        cells[1].dataset.raw = jyutping;
+        cells[1].innerHTML = jyutping.replace(/\d+/g, (match) => {
+            return `<span class="jyutping-number-${match}">${match}</span>`
+        });
+    }
+    else {
+        cells[0].contentEditable = "true";
+        cells[1].contentEditable = "true";
+        cells[1].innerHTML = cells[1].dataset.raw;
+        cells[2].contentEditable = "true";
+        cells[4].firstChild.textContent = "💾";
+    }
+}
+
+// For dynamically populating jyutping
+function updateJyutping(vocab_id) {
+    console.log("Vocab ID " + vocab_id);
+
+    tr = document.getElementById("tr" + vocab_id);
+    const cells = tr.querySelectorAll("td");
+    cantoneseCharacters = cells[0].innerHTML;
+
+    // Only make a request if there's input value
+    if (cantoneseCharacters) {
+        fetch(`http://localhost:8000/jyutping?characters=${cantoneseCharacters}`)
+            .then(response => response.json()) // Assume JSON response
+            .then(data => {
+                // Check if the response contains the 'foo' key
+                if (data.jyutping) {
+                    cells[1].textContent = data.jyutping;
+                }
+            })
+            .catch(error => {
+                // If error then don't try and change what's in the box
+                console.error('Error fetching data:', error);
+            });
+    }
+}
+
 // For playing audio
 function playAudio(mp3_id) {
+    if (!mp3_id) {
+        console.log("No audio found, skipping...");
+        return
+    }
     const player = document.getElementById("audio-" + mp3_id);
     if (player) {
         console.log("Playing audio...")

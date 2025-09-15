@@ -13,6 +13,7 @@ from server.routes import (
     favicon,
     get_tags,
     get_vocabulary,
+    patch_vocabulary,
     jyutping,
     insert_vocabulary,
     insert_tag,
@@ -48,6 +49,7 @@ if __name__ == "__main__":
     app.get("/exam.html", response_class=HTMLResponse)(exam)
     app.get("/jyutping")(jyutping)
     app.get("/vocabulary")(get_vocabulary)
+    app.patch("/vocabulary/{vocab_id}")(patch_vocabulary)
     app.post("/vocabulary")(insert_vocabulary)
     app.get("/tags")(get_tags)
     app.post("/tags")(insert_tag)
