@@ -126,7 +126,6 @@ function createRow(vocab_id, cantonese, jyutping, english, mp3_id) {
 
 // Function for creating empty row when button clicked
 document.getElementById('add-button').addEventListener('click', function () {
-    console.log("aaaaaa")
     tr = createRow("", "", "", "", null);
 
     const tableBody = document.getElementById("main-table-body");
@@ -235,6 +234,20 @@ function editRow(tr) {
         cells[2].contentEditable = "true";
         cells[4].firstChild.textContent = "💾";
     }
+}
+
+// Function for deleting a row
+function deleteRow(tr) {
+    const vocab_id = tr.dataset.vocab_id;
+    if (vocab_id) {
+        fetch('http://localhost:8000/vocabulary/' + vocab_id, { method: 'delete' })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+            });
+    }
+    tr.remove();
 }
 
 // For dynamically populating jyutping

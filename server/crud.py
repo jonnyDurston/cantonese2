@@ -32,6 +32,16 @@ async def get_vocab_with_tags(tags: list[str], conn: Connection):
         return [dict(item) for item in response]
 
 
+async def get_vocab(vocab_id: str, conn: Connection):
+    async with conn.cursor() as cur:
+        await cur.execute(
+            "SELECT vocab_id, cantonese, jyutping, english, mp3_id FROM vocabulary WHERE vocab_id = ?",
+            (vocab_id,),
+        )
+        response = await cur.fetchone()
+        return dict(response)
+
+
 async def insert_vocab(
     cantonese: str, jyutping: str, english: str, mp3_id: str | None, conn: Connection
 ):

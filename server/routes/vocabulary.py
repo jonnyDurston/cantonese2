@@ -3,8 +3,10 @@ from aiosqlite import Connection
 from fastapi import Depends
 
 from server.crud import (
+    delete_vocab,
     get_all_tags,
     get_all_vocab,
+    get_vocab,
     get_vocab_with_tags,
     insert_vocab,
     tag_vocab,
@@ -33,8 +35,8 @@ async def insert_vocabulary(
     print("Received request payload", data.model_dump())
 
     mp3_id = None
-    # if data.generate_speech:
-    #     mp3_id = generate_cantonese_tts(data.cantonese)
+    if data.generate_speech:
+        mp3_id = generate_cantonese_tts(data.cantonese)
 
     vocab_details = await insert_vocab(data.cantonese, data.jyutping, data.english, mp3_id, conn)
     if data.tags:
@@ -46,8 +48,16 @@ async def patch_vocabulary(
     vocab_id: str, data: POSTVocabulary, conn: Connection = Depends(get_database_connection)
 ):
     print(f"Updating {vocab_id} with payload {data}")
+    existing_vocab = await get_vocab(vocab_id, conn)
+
     mp3_id = None
-    # if data.generate_speech:
-    #     mp3_id = generate_cantonese_tts(data.cantonese)
+    if data.generate_speech:
+        if existing_vocab["cantonese"] != data.cantonese:
+            mp3_id = generate_cantonese_tts(data.cantonese)
 
     return await update_vocab(vocab_id, data.cantonese, data.jyutping, data.english, mp3_id, conn)
+
+
+async def delete_vocabulary(vocab_id: str, conn: Connection = Depends(get_database_connection)):
+    print(f"Deleting {vocab_id}")
+    await delete_vocab(vocab_id, conn)
