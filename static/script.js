@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadTags(selectedTags);
     loadTable(selectedTags);
+    addLink();
 })
 
 function loadTags(selectedTags) {
@@ -46,6 +47,29 @@ function loadTable(selectedTags) {
                 tableBody.insertBefore(tr, addPhraseRow)
             }
         });
+}
+
+// Redirecting to main page with correct params
+function addLink() {
+    document.querySelectorAll(".exam-link").forEach(link => {
+        link.addEventListener("click", (e) => {
+            e.preventDefault(); // Stop normal link behavior
+            e.stopPropagation(); // Stop any other handlers
+
+            const currentUrl = new URL(window.location.href);
+            const tags = currentUrl.searchParams.get("tags");
+
+            const newUrl = new URL(link.href, window.location.origin);
+
+            // Set ONLY the "tags" query param
+            if (tags) {
+                newUrl.searchParams.set("tags", tags);
+            }
+
+            // Overwrite the href
+            window.location.href = newUrl.toString();
+        })
+    });
 }
 
 function createRow(vocab_id, cantonese, jyutping, english, mp3_id) {
@@ -328,6 +352,7 @@ function tagChangeReload() {
     } else {
         url.searchParams.delete('tags');
     }
+    history.pushState({}, "", url);
 
     refreshTable(selectedTags);
 }

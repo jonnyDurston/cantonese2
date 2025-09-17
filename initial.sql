@@ -1,9 +1,11 @@
 CREATE TABLE vocabulary (
-  vocab_id     INTEGER PRIMARY KEY AUTOINCREMENT,
-  cantonese    TEXT    NOT NULL,
-  jyutping     TEXT    NOT NULL,
-  english      TEXT    NOT NULL,
-  created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  vocab_id     INTEGER  PRIMARY KEY AUTOINCREMENT,
+  cantonese    TEXT     NOT NULL,
+  jyutping     TEXT     NOT NULL,
+  english      TEXT     NOT NULL,
+  created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  correct      INTEGER  NOT NULL DEFAULT 0,
+  incorrect    INTEGER  NOT NULL DEFAULT 0
 );
 
 CREATE TABLE tags (

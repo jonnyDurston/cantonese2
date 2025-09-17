@@ -3,6 +3,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let incorrectQueue = [];             // To revisit
     let current = null;
 
+    addLink();
+
     const questionText = document.getElementById("question-text");
     const answerText = document.getElementById("answer-text");
     const answerBox = document.getElementById("answer-box");
@@ -131,6 +133,29 @@ function refreshPage(url = null) {
         const currentUrl = new URL(window.location.href);
         window.location.href = currentUrl.toString();
     }
+}
+
+// Redirecting to main page with correct params
+function addLink() {
+    document.querySelectorAll(".index-link").forEach(link => {
+        link.addEventListener("click", (e) => {
+            e.preventDefault(); // Stop normal link behavior
+            e.stopPropagation(); // Stop any other handlers
+
+            const currentUrl = new URL(window.location.href);
+            const tags = currentUrl.searchParams.get("tags");
+
+            const newUrl = new URL(link.href, window.location.origin);
+
+            // Set ONLY the "tags" query param
+            if (tags) {
+                newUrl.searchParams.set("tags", tags);
+            }
+
+            // Overwrite the href
+            window.location.href = newUrl.toString();
+        })
+    });
 }
 
 

@@ -90,7 +90,8 @@ body {
     flex: 0 0 auto;
 }
 
-.exam-link {
+.exam-link,
+.index-link {
     background-color: #1976d2;
     color: white;
     text-decoration: none;
@@ -99,7 +100,8 @@ body {
     font-weight: bold;
 }
 
-.exam-link:hover {
+.exam-link:hover,
+.index-link:hover {
     background-color: #1565c0;
 }
 
