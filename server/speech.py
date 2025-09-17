@@ -3,8 +3,8 @@ from uuid import uuid4
 from gtts import gTTS
 
 
-def generate_cantonese_tts(cantonese: str):
-    mp3_id = str(uuid4())
+def generate_cantonese_tts(cantonese: str, mp3_id: str | None):
+    mp3_id = mp3_id or str(uuid4())
 
     # Remove any text in brackets before converting to speech
     text = re.sub(r"\([^)]*\)", "", cantonese)

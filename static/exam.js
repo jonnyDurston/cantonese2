@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let incorrectQueue = [];             // To revisit
     let current = null;
 
-    addLink();
+    addLinkButton();
 
     const questionText = document.getElementById("question-text");
     const answerText = document.getElementById("answer-text");
@@ -136,7 +136,7 @@ function refreshPage(url = null) {
 }
 
 // Redirecting to main page with correct params
-function addLink() {
+function addLinkButton() {
     document.querySelectorAll(".index-link").forEach(link => {
         link.addEventListener("click", (e) => {
             e.preventDefault(); // Stop normal link behavior

@@ -69,7 +69,7 @@ async def update_vocab(
 async def delete_vocab(vocab_id: str, conn: Connection):
     async with conn.cursor() as cur:
         response = await cur.execute(
-            "DELETE FROM vocabulary WHERE vocab_id = ?",
+            "DELETE FROM vocabulary WHERE vocab_id = ? RETURNING vocab_id",
             (vocab_id,),
         )
         response = await cur.fetchone()

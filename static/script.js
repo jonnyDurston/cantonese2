@@ -1,16 +1,24 @@
+// On load we add tags to top bar and rows to table.
+// Also add in link to exam based on query params.
 document.addEventListener("DOMContentLoaded", () => {
     let params = new URLSearchParams(document.location.search);
     let selectedTags = (params.get("tags") || "").split(",").filter(e => e !== '');
 
+    // Populating with information from backend
     loadTags(selectedTags);
     loadTable(selectedTags);
-    addLink();
+
+    // Ensuring that buttons are assigned to correct functions
+    addLinkButton();
+    addNewRowButton();
+    addTagButton();
 })
 
+// Loads tags from /tags endpoint and populates them in top bar
 function loadTags(selectedTags) {
-    fetch('http://localhost:8000/tags').then(response => response.json()).then(tags => {
-        const tagScroll = document.getElementById('tag-scroll');
+    const tagScroll = document.getElementById('tag-scroll');
 
+    fetch('http://localhost:8000/tags').then(response => response.json()).then(tags => {
         for (let tag of tags) {
             const tagName = tag["tag_name"];
 
@@ -34,6 +42,7 @@ function loadTags(selectedTags) {
     });
 }
 
+// Loads vocab from /vocabulary endpoint and adds as rows to the table
 function loadTable(selectedTags) {
     const addPhraseRow = document.getElementById("add-phrase-tr")
 
@@ -49,8 +58,8 @@ function loadTable(selectedTags) {
         });
 }
 
-// Redirecting to main page with correct params
-function addLink() {
+// Ensures 'Go to Exam' button links to exam page with preserved tags param
+function addLinkButton() {
     document.querySelectorAll(".exam-link").forEach(link => {
         link.addEventListener("click", (e) => {
             e.preventDefault(); // Stop normal link behavior
@@ -66,12 +75,13 @@ function addLink() {
                 newUrl.searchParams.set("tags", tags);
             }
 
-            // Overwrite the href
             window.location.href = newUrl.toString();
         })
     });
 }
 
+// Creates a new row - can either be an existing populated row or an empty, unpopulated
+// one - in which case vocabId and mp3Id are both null
 function createRow(vocabId, cantonese, jyutping, english, mp3Id) {
     const tr = document.createElement("tr");
     const rowId = `tr-${crypto.randomUUID()}`;
@@ -108,16 +118,6 @@ function createRow(vocabId, cantonese, jyutping, english, mp3Id) {
     playButton.onclick = playFunc;
 
     mp3IdTd.appendChild(playButton);
-
-    if (mp3Id) {
-        const audio = document.createElement("audio");
-        audio.preload = "none";
-        audio.id = "audio-" + mp3Id
-        audio.src = "/static/audio/" + mp3Id + ".mp3";
-
-        mp3IdTd.appendChild(audio);
-    }
-
     tr.appendChild(mp3IdTd);
 
     // Adding edit row button
@@ -144,31 +144,22 @@ function createRow(vocabId, cantonese, jyutping, english, mp3Id) {
     deleteRowTd.appendChild(deleteButton);
     tr.appendChild(deleteRowTd)
 
-
     return tr
 }
 
 // Function for creating empty row when button clicked
-document.getElementById('add-button').addEventListener('click', function () {
-    tr = createRow("", "", "", "", null);
+function addNewRowButton() {
+    document.getElementById('add-button').addEventListener('click', function () {
+        tr = createRow("", "", "", "", null);
 
-    const tableBody = document.getElementById("main-table-body");
-    const addPhraseRow = document.getElementById("add-phrase-tr");
-    tableBody.insertBefore(tr, addPhraseRow);
+        const tableBody = document.getElementById("main-table-body");
+        const addPhraseRow = document.getElementById("add-phrase-tr");
+        tableBody.insertBefore(tr, addPhraseRow);
 
-    editRow(tr);
+        editRow(tr);
 
-    window.scrollTo(0, document.body.scrollHeight);
-});
-
-// Helper function for reloading the top bar
-function refreshTopBar(selectedTags) {
-    const tagScroll = document.getElementById("tag-scroll");
-    while (tagScroll.firstChild) {
-        tagScroll.removeChild(tagScroll.firstChild);
-    }
-
-    loadTags(selectedTags);
+        window.scrollTo(0, document.body.scrollHeight);
+    });
 }
 
 // Helper function for reloading the table and preserving the scroll location
@@ -302,42 +293,53 @@ function playAudio(mp3Id) {
         console.log("No audio found, skipping...");
         return
     }
-    const player = document.getElementById("audio-" + mp3Id);
-    if (player) {
-        console.log("Playing audio...")
-        player.play();
-    }
+
+    const audio = new Audio("/static/audio/" + mp3Id + ".mp3")
+    audio.play();
 }
 
 
 // Adding tag when button clicked
-document.getElementById('add-tag-button').addEventListener('click', function (event) {
-    event.preventDefault(); // Prevent form submission
+function addTagButton() {
+    document.getElementById('add-tag-button').addEventListener('click', function (event) {
+        event.preventDefault(); // Prevent form submission
 
-    const requestBody = {
-        tagName: document.getElementById('new-tag-input').value,
-    }
-    const checkboxes = document.getElementsByClassName('tag-checkbox');
-    const selectedTags = Array.from(checkboxes)
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => checkbox.value)
+        const requestBody = {
+            tagName: document.getElementById('new-tag-input').value,
+        }
+        const checkboxes = document.getElementsByClassName('tag-checkbox');
+        const selectedTags = Array.from(checkboxes)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value)
 
-    fetch('http://localhost:8000/tags', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-            // Reload the page while preserving the query parameters
-            refreshTopBar(selectedTags);
+        fetch('http://localhost:8000/tags', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody),
         })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-});
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                // Reload the page while preserving the query parameters
+                refreshTopBar(selectedTags);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+}
+
+
+// Helper function for reloading the top bar
+function refreshTopBar(selectedTags) {
+    const tagScroll = document.getElementById("tag-scroll");
+    while (tagScroll.firstChild) {
+        tagScroll.removeChild(tagScroll.firstChild);
+    }
+
+    loadTags(selectedTags);
+}
 
 // Reloading the page when checkbox is ticked
 function tagChangeReload() {

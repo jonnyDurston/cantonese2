@@ -50,10 +50,11 @@ async def patch_vocabulary(
     print(f"Updating {vocab_id} with payload {data}")
     existing_vocab = await get_vocab(vocab_id, conn)
 
-    mp3_id = None
+    mp3_id = existing_vocab["mp3_id"]
     if data.generate_speech:
         if existing_vocab["cantonese"] != data.cantonese:
-            mp3_id = generate_cantonese_tts(data.cantonese)
+            print("Generating new vocab TTS", existing_vocab["cantonese"], data.cantonese)
+            mp3_id = generate_cantonese_tts(data.cantonese, mp3_id)
 
     return await update_vocab(vocab_id, data.cantonese, data.jyutping, data.english, mp3_id, conn)
 
