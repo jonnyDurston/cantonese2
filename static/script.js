@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function loadTags(selectedTags) {
     fetch('http://localhost:8000/tags').then(response => response.json()).then(tags => {
-        const tagScroll = document.getElementById('tagScroll');
+        const tagScroll = document.getElementById('tag-scroll');
 
         for (let tag of tags) {
             const tagName = tag["tag_name"];
@@ -72,77 +72,77 @@ function addLink() {
     });
 }
 
-function createRow(vocab_id, cantonese, jyutping, english, mp3_id) {
+function createRow(vocabId, cantonese, jyutping, english, mp3Id) {
     const tr = document.createElement("tr");
     const rowId = `tr-${crypto.randomUUID()}`;
     tr.id = rowId;
-    tr.dataset.vocab_id = vocab_id;  // Store vocab_id if necessary
+    tr.dataset.vocabId = vocabId;  // Store vocabId if necessary
 
     // Adding Cantonese
-    const canto_td = document.createElement("td");
-    canto_td.textContent = cantonese;
-    var update_jyutping_func = () => updateJyutping(tr);
-    canto_td.addEventListener('input', update_jyutping_func);
-    tr.appendChild(canto_td);
+    const cantoTd = document.createElement("td");
+    cantoTd.textContent = cantonese;
+    var updateJyutpingFunc = () => updateJyutping(tr);
+    cantoTd.addEventListener('input', updateJyutpingFunc);
+    tr.appendChild(cantoTd);
 
     // Adding Jyutping
-    const jyut_td = document.createElement("td");
-    jyut_td.dataset.raw = jyutping;  // Store raw text for edit mode
-    jyut_td.innerHTML = jyutping.replace(/\d+/g, (match) => {
+    const jyutTd = document.createElement("td");
+    jyutTd.dataset.raw = jyutping;  // Store raw text for edit mode
+    jyutTd.innerHTML = jyutping.replace(/\d+/g, (match) => {
         return `<span class="jyutping-number-${match}">${match}</span>`
     });
-    tr.appendChild(jyut_td);
+    tr.appendChild(jyutTd);
 
     // Adding English
-    const english_td = document.createElement("td");
-    english_td.textContent = english;
-    tr.appendChild(english_td);
+    const englishTd = document.createElement("td");
+    englishTd.textContent = english;
+    tr.appendChild(englishTd);
 
     // Adding MP3 play button
-    const mp3_id_td = document.createElement("td");
+    const mp3IdTd = document.createElement("td");
 
-    const play_button = document.createElement("button");
-    var play_func = () => playAudio(mp3_id);
-    play_button.className = "table-button";
-    play_button.textContent = "🔊";
-    play_button.onclick = play_func;
+    const playButton = document.createElement("button");
+    var playFunc = () => playAudio(mp3Id);
+    playButton.className = "table-button";
+    playButton.textContent = "🔊";
+    playButton.onclick = playFunc;
 
-    mp3_id_td.appendChild(play_button);
+    mp3IdTd.appendChild(playButton);
 
-    if (mp3_id) {
+    if (mp3Id) {
         const audio = document.createElement("audio");
         audio.preload = "none";
-        audio.id = "audio-" + mp3_id
-        audio.src = "/static/audio/" + mp3_id + ".mp3";
+        audio.id = "audio-" + mp3Id
+        audio.src = "/static/audio/" + mp3Id + ".mp3";
 
-        mp3_id_td.appendChild(audio);
+        mp3IdTd.appendChild(audio);
     }
 
-    tr.appendChild(mp3_id_td);
+    tr.appendChild(mp3IdTd);
 
     // Adding edit row button
-    const edit_row_td = document.createElement("td");
+    const editRowTd = document.createElement("td");
 
-    const edit_button = document.createElement("button");
-    var edit_func = () => editRow(tr);
-    edit_button.className = "table-button";
-    edit_button.textContent = "✏️";
-    edit_button.onclick = edit_func;
+    const editButton = document.createElement("button");
+    var editFunc = () => editRow(tr);
+    editButton.className = "table-button";
+    editButton.textContent = "✏️";
+    editButton.onclick = editFunc;
 
-    edit_row_td.appendChild(edit_button);
-    tr.appendChild(edit_row_td)
+    editRowTd.appendChild(editButton);
+    tr.appendChild(editRowTd)
 
     // Adding delete row button
-    const delete_row_td = document.createElement("td");
+    const deleteRowTd = document.createElement("td");
 
-    const delete_button = document.createElement("button");
-    var delete_func = () => deleteRow(tr);
-    delete_button.className = "table-button";
-    delete_button.textContent = "🗑️";
-    delete_button.onclick = delete_func;
+    const deleteButton = document.createElement("button");
+    var deleteFunc = () => deleteRow(tr);
+    deleteButton.className = "table-button";
+    deleteButton.textContent = "🗑️";
+    deleteButton.onclick = deleteFunc;
 
-    delete_row_td.appendChild(delete_button);
-    tr.appendChild(delete_row_td)
+    deleteRowTd.appendChild(deleteButton);
+    tr.appendChild(deleteRowTd)
 
 
     return tr
@@ -163,7 +163,7 @@ document.getElementById('add-button').addEventListener('click', function () {
 
 // Helper function for reloading the top bar
 function refreshTopBar(selectedTags) {
-    const tagScroll = document.getElementById("tagScroll");
+    const tagScroll = document.getElementById("tag-scroll");
     while (tagScroll.firstChild) {
         tagScroll.removeChild(tagScroll.firstChild);
     }
@@ -188,7 +188,7 @@ function refreshTable(selectedTags) {
 // For editing existing rows
 function editRow(tr) {
     const cells = tr.querySelectorAll("td");
-    const vocab_id = tr.dataset.vocab_id;
+    const vocabId = tr.dataset.vocabId;
 
     if (cells[4].firstChild.textContent === "💾") {
         const cantonese = cells[0].textContent;
@@ -217,8 +217,8 @@ function editRow(tr) {
             tags: selectedTags
         }
 
-        const method = vocab_id === "" ? 'POST' : 'PATCH';
-        const url = vocab_id === "" ? 'http://localhost:8000/vocabulary' : 'http://localhost:8000/vocabulary/' + vocab_id;
+        const method = vocabId === "" ? 'POST' : 'PATCH';
+        const url = vocabId === "" ? 'http://localhost:8000/vocabulary' : 'http://localhost:8000/vocabulary/' + vocabId;
 
         fetch(url, {
             method: method,
@@ -232,14 +232,14 @@ function editRow(tr) {
 
                 return response.json()
             }).then(json => {
-                if (vocab_id == null) {
-                    tr.dataset.vocab_id = json['vocab_id'];
+                if (vocabId == null) {
+                    tr.dataset.vocabId = json['vocab_id'];
 
                     // Adding audio (if successful)
-                    var play_func = () => playAudio(mp3_id);
-                    cells[3].onclick = play_func;
+                    var playFunc = () => playAudio(json['mp3_id']);
+                    cells[3].onclick = playFunc;
 
-                    if (mp3_id) {
+                    if (json['mp3_id']) {
                         const audio = document.createElement("audio");
                         audio.preload = "none";
                         audio.id = "audio-" + json['mp3_id'];
@@ -262,9 +262,9 @@ function editRow(tr) {
 
 // Function for deleting a row
 function deleteRow(tr) {
-    const vocab_id = tr.dataset.vocab_id;
-    if (vocab_id) {
-        fetch('http://localhost:8000/vocabulary/' + vocab_id, { method: 'delete' })
+    const vocabId = tr.dataset.vocabId;
+    if (vocabId) {
+        fetch('http://localhost:8000/vocabulary/' + vocabId, { method: 'delete' })
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok ' + response.statusText);
@@ -297,12 +297,12 @@ function updateJyutping(tr) {
 }
 
 // For playing audio
-function playAudio(mp3_id) {
-    if (!mp3_id) {
+function playAudio(mp3Id) {
+    if (!mp3Id) {
         console.log("No audio found, skipping...");
         return
     }
-    const player = document.getElementById("audio-" + mp3_id);
+    const player = document.getElementById("audio-" + mp3Id);
     if (player) {
         console.log("Playing audio...")
         player.play();
@@ -311,11 +311,11 @@ function playAudio(mp3_id) {
 
 
 // Adding tag when button clicked
-document.getElementById('addTagBtn').addEventListener('click', function (event) {
+document.getElementById('add-tag-button').addEventListener('click', function (event) {
     event.preventDefault(); // Prevent form submission
 
     const requestBody = {
-        tag_name: document.getElementById('newTagInput').value,
+        tagName: document.getElementById('new-tag-input').value,
     }
     const checkboxes = document.getElementsByClassName('tag-checkbox');
     const selectedTags = Array.from(checkboxes)

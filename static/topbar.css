@@ -65,14 +65,14 @@ body {
     gap: 10px;
 }
 
-#newTagInput {
+.new-tag-input {
     padding: 6px;
     border-radius: 4px;
     border: 1px solid #ccc;
     width: 160px;
 }
 
-#addTagBtn {
+.add-tag-button {
     background-color: lightgrey;
     color: white;
     padding: 5px 10px;
@@ -80,7 +80,7 @@ body {
     cursor: pointer;
 }
 
-#addTagBtn:hover {
+.add-tag-button:hover {
     background-color: grey;
 
 }
