@@ -11,3 +11,7 @@ class POSTVocabulary(BaseModel):
 
 class POSTTag(BaseModel):
     tag_name: str = Field(min_length=1)
+
+
+class POSTVocabularyAttempt(BaseModel):
+    correct: bool

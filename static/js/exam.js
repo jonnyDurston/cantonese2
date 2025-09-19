@@ -3,7 +3,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let incorrectQueue = [];             // To revisit
     let current = null;
 
+    let params = new URLSearchParams(document.location.search);
+    let selectedTags = (params.get("tags") || "").split(",").filter(e => e !== '');
+    let selectedLanguage = params.get("language");
+
     addLinkButton();
+    loadLanguageSelector(selectedLanguage);
+    loadTags(selectedTags);
 
     const questionText = document.getElementById("question-text");
     const answerText = document.getElementById("answer-text");
@@ -13,21 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const incorrectBtn = document.getElementById("incorrect-btn");
     const progressBar = document.getElementById("progress-bar");
 
-    // Helper function to color jyutping
-    function formatJyutping(jyutping) {
-        return jyutping.replace(/([1-6])\b/g, (match, tone) => {
-            return `<span class="jyutping-number-${tone}">${tone}</span>`;
-        });
-    }
-
-    // From https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-    }
-
     function updateProgress() {
         const total = VOCAB_LIST.length;
         const asked = total - queue.length - incorrectQueue.length;
@@ -36,12 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
         progressBar.textContent = `${percent}%`;
     }
 
-    function playSound(mp3_id) {
-        const audio = new Audio(`/static/audio/${mp3_id}.mp3`);
-        audio.play().catch(error => {
-            console.error('Audio playback failed:', error);
-        });
-    }
+
 
     function nextQuestion() {
         updateProgress();
@@ -124,6 +110,34 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+function runExam() {
+
+}
+
+
+// Helper function to color jyutping
+function formatJyutping(jyutping) {
+    return jyutping.replace(/([1-6])\b/g, (match, tone) => {
+        return `<span class="jyutping-number-${tone}">${tone}</span>`;
+    });
+}
+
+// From https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+// Plays sound
+function playSound(mp3_id) {
+    const audio = new Audio(`/static/audio/${mp3_id}.mp3`);
+    audio.play().catch(error => {
+        console.error('Audio playback failed:', error);
+    });
+}
+
 // Helper function for reloading the page and preserving the scroll location
 function refreshPage(url = null) {
     sessionStorage.setItem('scrollpos', window.scrollY);
@@ -178,19 +192,73 @@ Array.from(document.getElementsByClassName('tag-checkbox')).forEach((checkbox) =
     })
 })
 
+// Ensures when language selector toggled
+function loadLanguageSelector(selectedLanguage) {
+    const cantoneseButton = document.getElementById('cantonese-radio-button');
+    const englishButton = document.getElementById('english-radio-button');
+
+    if (selectedLanguage = "cantonese") {
+        cantoneseButton.checked = "true";
+    }
+    else {
+        englishButton.checked = "true";
+    }
+
+    [cantoneseButton, englishButton].forEach(button => {
+        button.addEventListener(
+            'change', tagChangeReload
+        )
+    })
+}
+
+// Loads tags from /tags endpoint and populates them in top bar
+function loadTags(selectedTags) {
+    const tagScroll = document.getElementById('tag-scroll');
+
+    fetch('http://localhost:8000/tags').then(response => response.json()).then(tags => {
+        for (let tag of tags) {
+            const tagName = tag["tag_name"];
+
+            const tagLabel = document.createElement("label");
+            tagLabel.className = "tag-item";
+            tagLabel.textContent = " " + tagName;
+
+            const tagInput = document.createElement("input");
+            tagInput.className = "tag-checkbox";
+            tagInput.type = "checkbox";
+            tagInput.value = tagName;
+            if (selectedTags.includes(tagName)) {
+                tagInput.checked = true;
+            }
+            tagInput.addEventListener('change', tagChangeReload)
+
+            tagLabel.appendChild(tagInput);
+
+            tagScroll.appendChild(tagLabel);
+        }
+    });
+}
 
 // Reloading page when language is toggled
-Array.from(document.getElementsByClassName('language-checkbox')).forEach((checkbox) => {
-    checkbox.addEventListener("change", function () {
-        const language = document.getElementById("language-selector").elements["language"].value;
+function tagChangeReload() {
+    const language = document.getElementById("language-selector").elements["language"].value;
+    const checkboxes = document.getElementsByClassName('tag-checkbox');
+    const selectedTags = Array.from(checkboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value)
 
-        const url = new URL(window.location);
-        if (language === "cantonese") {
-            url.searchParams.set("display_mode", "cantonese")
-        } else {
-            url.searchParams.set("display_mode", "english")
-        }
+    const url = new URL(window.location);
+    if (language === "cantonese") {
+        url.searchParams.set("display_mode", "cantonese")
+    } else {
+        url.searchParams.set("display_mode", "english")
+    }
+    if (selectedTags.length > 0) {
+        url.searchParams.set('tags', selectedTags.join(','));
+    } else {
+        url.searchParams.delete('tags');
+    }
+    history.pushState({}, "", url);
 
-        refreshPage(url);
-    })
-})
+    refreshPage(url);
+}

@@ -100,3 +100,14 @@ async def tag_vocab(vocab_id: int, tags: list[str], conn: Connection):
             "INSERT INTO vocabulary_tags (vocab_id, tag_name) VALUES (?, ?)",
             [(vocab_id, tag_name) for tag_name in tags],
         )
+
+
+async def update_vocab_attempt(vocab_id: int, correct: bool, conn: Connection):
+    column = "correct" if correct else "incorrect"
+    async with conn.cursor() as cur:
+        await cur.execute(
+            f"UPDATE vocabulary SET {column} = ? WHERE vocab_id = ? RETURNING vocab_id;",
+            (vocab_id,),
+        )
+        response = await cur.fetchone()
+        return dict(response)

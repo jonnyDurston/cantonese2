@@ -4,17 +4,17 @@ from fastapi import Depends
 
 from server.crud import (
     delete_vocab,
-    get_all_tags,
     get_all_vocab,
     get_vocab,
     get_vocab_with_tags,
     insert_vocab,
     tag_vocab,
     update_vocab,
+    update_vocab_attempt,
 )
 from server.database import get_database_connection
 from server.speech import generate_cantonese_tts
-from ..models import POSTVocabulary
+from ..models import POSTVocabulary, POSTVocabularyAttempt
 
 
 async def get_vocabulary(tags: str = "", conn: Connection = Depends(get_database_connection)):
@@ -59,6 +59,13 @@ async def patch_vocabulary(
     return await update_vocab(vocab_id, data.cantonese, data.jyutping, data.english, mp3_id, conn)
 
 
+async def update_vocabulary_attempt(
+    vocab_id: str, data: POSTVocabularyAttempt, conn: Connection = Depends(get_database_connection)
+):
+    print(f"Updating status for {vocab_id} to {data.correct}")
+    return await update_vocab_attempt(vocab_id, data.correct, conn)
+
+
 async def delete_vocabulary(vocab_id: str, conn: Connection = Depends(get_database_connection)):
     print(f"Deleting {vocab_id}")
-    await delete_vocab(vocab_id, conn)
+    return await delete_vocab(vocab_id, conn)
