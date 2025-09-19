@@ -4,6 +4,7 @@
 <head>
     <title>Examination</title>
     <link rel="stylesheet" href="static/css/exam.css">
+    <link rel="stylesheet" href="static/css/examfilters.css">
     <link rel="stylesheet" href="static/css/topbar.css">
     <link rel="stylesheet" href="static/css/base.css">
 </head>
@@ -21,18 +22,25 @@
         </div>
 
         <!-- Selecting language to test in -->
-        <form id="language-selector">
-            <div>
-                <input type="radio" id="cantonese-radio-button" name="language" value="cantonese"
-                    class="language-checkbox" />
-                <label for="cantonese-radio-button">Cantonese</label>
+        <div>
+            <form id="language-selector">
+                <div>
+                    <input type="radio" id="cantonese-radio-button" name="language" value="cantonese"
+                        class="language-checkbox" />
+                    <label for="cantonese-radio-button">Cantonese</label>
+                </div>
+                <div>
+                    <input type="radio" id="english-radio-button" name="language" value="english"
+                        class="language-checkbox" />
+                    <label for="english-radio-button">English</label>
+                </div>
+            </form>
+
+            <div class="difficulty-box">
+                <label for="difficulty-slider">Difficulty:</label>
+                <input type="range" id="difficulty-slider" min="0" max="100" value="0">
             </div>
-            <div>
-                <input type="radio" id="english-radio-button" name="language" value="english"
-                    class="language-checkbox" />
-                <label for="english-radio-button">English</label>
-            </div>
-        </form>
+        </div>
 
         <div class="exam-button">
             <a href="index.html" class="index-link">📝 Go to Vocab</a>

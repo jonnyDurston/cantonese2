@@ -5,7 +5,7 @@ from aiosqlite import Connection
 async def get_all_vocab(conn: Connection):
     async with conn.cursor() as cur:
         await cur.execute(
-            "SELECT vocab_id, cantonese, jyutping, english, mp3_id FROM vocabulary ORDER BY created_date"
+            "SELECT vocab_id, cantonese, jyutping, english, mp3_id, correct, incorrect FROM vocabulary ORDER BY created_date"
         )
         response = await cur.fetchall()
         return [dict(item) for item in response]
@@ -18,7 +18,7 @@ async def get_vocab_with_tags(tags: list[str], conn: Connection):
             WITH sel(tag_name) AS (
                 SELECT value FROM json_each(?)
             )
-            SELECT v.vocab_id, v.cantonese, v.jyutping, v.english, v.mp3_id
+            SELECT v.vocab_id, v.cantonese, v.jyutping, v.english, v.mp3_id, v.correct, v.incorrect
             FROM vocabulary AS v
             JOIN vocabulary_tags AS vt ON v.vocab_id = vt.vocab_id
             JOIN sel ON vt.tag_name = sel.tag_name
@@ -106,7 +106,7 @@ async def update_vocab_attempt(vocab_id: int, correct: bool, conn: Connection):
     column = "correct" if correct else "incorrect"
     async with conn.cursor() as cur:
         await cur.execute(
-            f"UPDATE vocabulary SET {column} = ? WHERE vocab_id = ? RETURNING vocab_id;",
+            f"UPDATE vocabulary SET {column} = {column} + 1 WHERE vocab_id = ? RETURNING vocab_id;",
             (vocab_id,),
         )
         response = await cur.fetchone()

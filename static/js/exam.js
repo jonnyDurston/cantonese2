@@ -6,9 +6,11 @@ document.addEventListener("DOMContentLoaded", () => {
     let params = new URLSearchParams(document.location.search);
     let selectedTags = (params.get("tags") || "").split(",").filter(e => e !== '');
     let selectedLanguage = params.get("language");
+    let selectedDifficulty = Number(params.get("difficulty"));
 
     addLinkButton();
     loadLanguageSelector(selectedLanguage);
+    loadDifficultySlider(selectedDifficulty);
     loadTags(selectedTags);
 
     const questionText = document.getElementById("question-text");
@@ -26,8 +28,6 @@ document.addEventListener("DOMContentLoaded", () => {
         progressBar.value = percent;
         progressBar.textContent = `${percent}%`;
     }
-
-
 
     function nextQuestion() {
         updateProgress();
@@ -58,6 +58,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function sendUpdate(correct) {
+        fetch('http://localhost:8000/vocabulary/' + current.vocab_id + '/attempt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ correct: correct }),
+        }).then(response => response.json())
+    }
+
     showAnswerBtn.addEventListener("click", () => {
         if (DISPLAY_MODE === "english") {
             answerText.innerHTML = `${current.cantonese} (${formatJyutping(current.jyutping)})`;
@@ -70,11 +78,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     correctBtn.addEventListener("click", () => {
+        sendUpdate(true);
         nextQuestion();
     });
 
     incorrectBtn.addEventListener("click", () => {
         incorrectQueue.push(current);
+        sendUpdate(false);
         nextQuestion();
     });
 
@@ -211,6 +221,13 @@ function loadLanguageSelector(selectedLanguage) {
     })
 }
 
+// Loading difficulty slider
+function loadDifficultySlider(selectedDifficulty) {
+    const difficultySlider = document.getElementById('difficulty-slider');
+    difficultySlider.value = selectedDifficulty;
+    difficultySlider.addEventListener('change', tagChangeReload);
+}
+
 // Loads tags from /tags endpoint and populates them in top bar
 function loadTags(selectedTags) {
     const tagScroll = document.getElementById('tag-scroll');
@@ -246,18 +263,20 @@ function tagChangeReload() {
     const selectedTags = Array.from(checkboxes)
         .filter(checkbox => checkbox.checked)
         .map(checkbox => checkbox.value)
+    const difficulty = document.getElementById('difficulty-slider').value;
 
     const url = new URL(window.location);
     if (language === "cantonese") {
-        url.searchParams.set("display_mode", "cantonese")
+        url.searchParams.set("display_mode", "cantonese");
     } else {
-        url.searchParams.set("display_mode", "english")
+        url.searchParams.set("display_mode", "english");
     }
     if (selectedTags.length > 0) {
         url.searchParams.set('tags', selectedTags.join(','));
     } else {
         url.searchParams.delete('tags');
     }
+    url.searchParams.set('difficulty', difficulty)
     history.pushState({}, "", url);
 
     refreshPage(url);

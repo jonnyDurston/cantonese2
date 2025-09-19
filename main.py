@@ -17,8 +17,9 @@ from server.routes import (
     jyutping,
     insert_vocabulary,
     insert_tag,
+    update_vocabulary_attempt,
+    delete_vocabulary,
 )
-from server.routes.vocabulary import delete_vocabulary
 
 
 @asynccontextmanager
@@ -53,6 +54,7 @@ if __name__ == "__main__":
     app.patch("/vocabulary/{vocab_id}")(patch_vocabulary)
     app.post("/vocabulary")(insert_vocabulary)
     app.delete("/vocabulary/{vocab_id}")(delete_vocabulary)
+    app.post("/vocabulary/{vocab_id}/attempt")(update_vocabulary_attempt)
     app.get("/tags")(get_tags)
     app.post("/tags")(insert_tag)
     app.mount("/static", StaticFiles(directory="static"), name="static")

@@ -12,6 +12,7 @@ async def exam(
     request: Request,
     tags: str = "",
     display_mode: str = "cantonese",
+    difficulty: int = 0,
     conn: Connection = Depends(get_database_connection),
     templates: Jinja2Templates = Depends(get_jinja_templates),
 ):
@@ -27,6 +28,15 @@ async def exam(
     for tag in all_tags:
         tag["checked"] = tag["tag_name"] in filter_tags
 
+    print(vocab)
+    vocab = list(
+        filter(
+            lambda v: (((v["incorrect"] + 1) / (v["correct"] + v["incorrect"] + 1)) * 100)
+            >= difficulty,
+            vocab,
+        )
+    )
+    print(vocab)
     random.shuffle(vocab)
 
     return templates.TemplateResponse(
