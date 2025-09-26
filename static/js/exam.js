@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let params = new URLSearchParams(document.location.search);
     let selectedTags = (params.get("tags") || "").split(",").filter(e => e !== '');
-    let selectedLanguage = params.get("language");
+    let selectedLanguage = params.get("display_mode");
     let selectedDifficulty = Number(params.get("difficulty"));
 
     addLinkButton();
@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const correctBtn = document.getElementById("correct-btn");
     const incorrectBtn = document.getElementById("incorrect-btn");
     const progressBar = document.getElementById("progress-bar");
+    const questionCounter = document.getElementById("question-counter");
 
     function updateProgress() {
         const total = VOCAB_LIST.length;
@@ -27,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const percent = Math.round((asked / total) * 100);
         progressBar.value = percent;
         progressBar.textContent = `${percent}%`;
+        questionCounter.textContent = `${total - asked}`;
     }
 
     function nextQuestion() {
@@ -207,11 +209,15 @@ function loadLanguageSelector(selectedLanguage) {
     const cantoneseButton = document.getElementById('cantonese-radio-button');
     const englishButton = document.getElementById('english-radio-button');
 
-    if (selectedLanguage = "cantonese") {
-        cantoneseButton.checked = "true";
+    console.log(selectedLanguage);
+
+    if (selectedLanguage === "cantonese") {
+        cantoneseButton.checked = true;
+        englishButton.checked = false;
     }
     else {
-        englishButton.checked = "true";
+        englishButton.checked = true;
+        cantoneseButton.checked = false;
     }
 
     [cantoneseButton, englishButton].forEach(button => {

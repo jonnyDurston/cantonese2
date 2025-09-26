@@ -33,6 +33,7 @@ body {
     text-align: center;
     max-width: 600px;
     width: 90%;
+    position: relative;
 }
 
 /* Typography */
@@ -126,4 +127,13 @@ button {
 #progress-bar::-webkit-progress-value {
     background-color: #007bff;
     border-radius: 0.75rem;
+}
+
+#question-counter {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    margin-block-end: 0em;
+    color: #666;
+    text-align: right;
 }
