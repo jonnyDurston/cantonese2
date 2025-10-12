@@ -243,15 +243,16 @@ function editRow(tr) {
             });
     }
     else {
-        cells[0].contentEditable = "true";
-        cells[1].contentEditable = "true";
+        cells[0].contentEditable = "plaintext-only";
+        cells[1].contentEditable = "plaintext-only";
         cells[1].innerHTML = cells[1].dataset.raw;
-        cells[2].contentEditable = "true";
+        cells[2].contentEditable = "plaintext-only";
         cells[4].firstChild.textContent = "💾";
     }
 }
 
 // Function for deleting a row
+// T裇	雨衣	眼鏡 長褲 牛仔褲	手套	
 function deleteRow(tr) {
     const vocabId = tr.dataset.vocabId;
     if (vocabId) {
@@ -305,7 +306,7 @@ function addTagButton() {
         event.preventDefault(); // Prevent form submission
 
         const requestBody = {
-            tagName: document.getElementById('new-tag-input').value,
+            tag_name: document.getElementById('new-tag-input').value,
         }
         const checkboxes = document.getElementsByClassName('tag-checkbox');
         const selectedTags = Array.from(checkboxes)

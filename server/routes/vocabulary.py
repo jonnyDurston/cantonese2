@@ -36,7 +36,7 @@ async def insert_vocabulary(
 
     mp3_id = None
     if data.generate_speech:
-        mp3_id = generate_cantonese_tts(data.cantonese)
+        mp3_id = generate_cantonese_tts(data.cantonese, None)
 
     vocab_details = await insert_vocab(data.cantonese, data.jyutping, data.english, mp3_id, conn)
     if data.tags:
